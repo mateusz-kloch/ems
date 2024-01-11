@@ -1,6 +1,6 @@
 from pickle import load, dump
 
-from ..run import MyExpense, read_db
+from run import MyExpense, read_db
 
 
 def test_read_db(tmp_path):
