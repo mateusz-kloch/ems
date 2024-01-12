@@ -8,7 +8,7 @@ import click
 from dateutil import parser
 
 
-DATABASE_PATH = 'my_project/budget.db'
+DATABASE_PATH = 'budget.db'
 DT_FORMAT = '%d/%m/%Y'
 BIG_EXPENSE = 500
 HELP_ADD = 'Add new expense to datebase.'
@@ -48,10 +48,10 @@ def read_db(db_filename: str) -> list[MyExpense]:
 
 def generate_new_id_num(expenses: list[MyExpense]) -> int:
     id_nums = {expense.id_num for expense in expenses}
-    counter = 1
-    while counter in id_nums:
-        counter +=1
-    return counter
+    new_id = 1
+    while new_id in id_nums:
+        new_id +=1
+    return new_id
 
 
 def generate_date(dt: str | None) -> str:
@@ -63,9 +63,9 @@ def generate_date(dt: str | None) -> str:
     return dt
 
 
-def create_expense(expenses: list[MyExpense], dt: str, value: str, desc: str) -> MyExpense:
+def create_expense(id_num: int, dt: str, value: str, desc: str) -> MyExpense:
     new_expense = MyExpense(
-        id_num = generate_new_id_num(expenses),
+        id_num = id_num,
         dt = dt,
         value = float(value),
         desc = desc
@@ -78,9 +78,9 @@ def add_new_expense(expenses: list[MyExpense], new_expense: MyExpense) -> list[M
     return expenses
 
 
-def write_db(db_filename: str, updated_expenses: list[MyExpense]) -> None:
+def write_db(db_filename: str, expenses: list[MyExpense]) -> None:
     with open(db_filename, 'wb') as stream:
-        dump(updated_expenses, stream)
+        dump(expenses, stream)
 
 
 def sort_expenses(expenses: list[MyExpense], sort: str | None, descending: bool) -> list[MyExpense]:
@@ -109,13 +109,6 @@ def import_from_csv(csv_path: str) -> list[MyExpense]:
     return csv_content
 
 
-def generate_new_name(filepath: str, occurrence: int) -> str:
-    filepath_parts = filepath.rsplit('.', maxsplit=1)
-    path, extension = filepath_parts
-    new_filepath = f'{path}({str(occurrence)}).{extension}'
-    return new_filepath
-
-
 def export_to_csv(filepath: str, expenses: list[MyExpense]) -> None:
     if not filepath.endswith('.csv'):
         raise ValueError('Missing extension for new file.')
@@ -132,6 +125,13 @@ def export_to_csv(filepath: str, expenses: list[MyExpense]) -> None:
                     'desc' : expense.desc
                 }
             )
+
+
+def generate_new_name(filepath: str, occurrency: int) -> str:
+    filepath_parts = filepath.rsplit('.', maxsplit=1)
+    path, extension = filepath_parts
+    new_filepath = f'{path}({str(occurrency)}).{extension}'
+    return new_filepath
 
 
 @click.group()
@@ -154,9 +154,11 @@ def add(value: str, description: str, dt: str | None) -> None:
     except ValueError:
             print('Invalid date format')
             sys.exit(1)
+    
+    id_num = generate_new_id_num(expenses)
 
     try:
-        new_expense = create_expense(expenses, dt, value, description)
+        new_expense = create_expense(id_num, dt, value, description)
     except ValueError as exception:
         print(f'Error: {exception.args[0]}')
         sys.exit(2)
@@ -225,9 +227,10 @@ def import_csv(filepath: str, dt: str | None) -> None:
             sys.exit(7)
 
     for expense in csv_content:
+        id_num = generate_new_id_num(expenses)
         value , desc = expense.values()
         try:
-            new_expense = create_expense(expenses, dt, value, desc)
+            new_expense = create_expense(id_num, dt, value, desc)
         except ValueError as exception:
             print(f'Error: {exception.args[0]}')
             sys.exit(8)
@@ -255,15 +258,15 @@ def export_csv(filepath) -> None:
         export_to_csv(filepath, expenses)
         print(f'Saved as: {filepath}.')
     except FileExistsError:
-        occurrence = 2
+        occurrency = 2
         while True:
             try: 
-                new_filepath = generate_new_name(filepath, occurrence)
+                new_filepath = generate_new_name(filepath, occurrency)
                 export_to_csv(new_filepath, expenses)
                 print(f'Saved as: {new_filepath}.')
                 break
             except FileExistsError:
-                occurrence += 1
+                occurrency += 1
     except FileNotFoundError:
         print('There is no such file or directory.')
         sys.exit(11)
