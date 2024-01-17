@@ -18,12 +18,12 @@ HELP_REPORT = 'Viem expenses database as table.'
 HELP_OPTION_SORT = 'View expenses sorted by "date" or "value", by default they are sorted by id numbers.'
 HELP_OPTION_DESCENDING = 'View expenses in descending order, default: ascending.'
 HELP_OPTION_PYTHON = 'View expenses as python code representation.'
-HELP_IMPORT_CSV = 'Import data from file, supported file formats: csv.'
-HELP_EXPORT_CSV = 'Export data to file, supported file formats: csv.'
+HELP_IMPORT_FROM = 'Import data from file, supported file formats: csv.'
+HELP_EXPORT_TO = 'Export data to file, supported file formats: csv.'
 
 
 @dataclass
-class MyExpense:
+class UserExpense:
     id_num: int
     dt : str
     value: float
@@ -43,13 +43,13 @@ class MyExpense:
         return self.value >= BIG_EXPENSE
 
 
-def read_db(db_filepath: str) -> list[MyExpense]:
+def read_db(db_filepath: str) -> list[UserExpense]:
     with open(db_filepath, 'rb') as stream:
         restored = load(stream)
     return restored
 
 
-def generate_new_id_num(expenses: list[MyExpense]) -> int:
+def generate_new_id_num(expenses: list[UserExpense]) -> int:
     id_nums = {expense.id_num for expense in expenses}
     new_id = 1
     while new_id in id_nums:
@@ -66,8 +66,8 @@ def generate_date(dt: str|None) -> str:
     return dt
 
 
-def create_expense(id_num: int, dt: str, value: str, desc: str) -> MyExpense:
-    new_expense = MyExpense(
+def create_expense(id_num: int, dt: str, value: str, desc: str) -> UserExpense:
+    new_expense = UserExpense(
         id_num = id_num,
         dt = dt,
         value = float(value),
@@ -76,17 +76,17 @@ def create_expense(id_num: int, dt: str, value: str, desc: str) -> MyExpense:
     return new_expense
 
 
-def add_new_expense(expenses: list[MyExpense], new_expense: MyExpense) -> list[MyExpense]:
+def add_new_expense(expenses: list[UserExpense], new_expense: UserExpense) -> list[UserExpense]:
     expenses.append(new_expense)
     return expenses
 
 
-def write_db(db_filepath: str, expenses: list[MyExpense]) -> None:
+def write_db(db_filepath: str, expenses: list[UserExpense]) -> None:
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
 
 
-def sort_expenses(expenses: list[MyExpense], sort: str|None, descending: bool) -> list[MyExpense]:
+def sort_expenses(expenses: list[UserExpense], sort: str|None, descending: bool) -> list[UserExpense]:
     if sort == 'date':
         sorted_expenses = sorted(expenses, key=lambda x: x.dt.split('/')[::-1], reverse=descending)
     elif sort == 'value':
@@ -96,14 +96,14 @@ def sort_expenses(expenses: list[MyExpense], sort: str|None, descending: bool) -
     return sorted_expenses
 
 
-def compute_total_expenses_value(expenses: list[MyExpense]) -> float:
+def compute_total_expenses_value(expenses: list[UserExpense]) -> float:
     total = 0
     for expense in expenses:
         total += expense.value
     return total
 
 
-def import_from_csv(csv_filepath: str) -> list[MyExpense]:
+def import_csv(csv_filepath: str) -> list[UserExpense]:
     with open(csv_filepath, encoding='utf-8') as stream:
         reader = DictReader(stream)
         csv_content = [row for row in reader]
@@ -112,7 +112,7 @@ def import_from_csv(csv_filepath: str) -> list[MyExpense]:
     return csv_content
 
 
-def export_to_csv(csv_filepath: str, expenses: list[MyExpense]) -> None:
+def export_csv(csv_filepath: str, expenses: list[UserExpense]) -> None:
     if not csv_filepath.endswith('.csv'):
         raise ValueError('Missing extension for new file.')
     fieldnames = ['id_num', 'dt', 'value', 'desc']
@@ -207,18 +207,18 @@ def report(db_filepath: str, sort: str|None, descending: bool, python: bool) -> 
         print(f'Total: {total:10.2f}')
 
 
-@cli.command(help=HELP_IMPORT_CSV)
+@cli.command(help=HELP_IMPORT_FROM)
 @click.argument('import_path')
 @click.option('--db-filepath', default=DEFAULT_DB_FILEPATH, help=HELP_OPTION_DB_FILEPATH)
 @click.option('--dt', help=HELP_OPTION_DT)
-def import_csv(import_path: str, db_filepath: str, dt: str|None) -> None:
+def import_from(import_path: str, db_filepath: str, dt: str|None) -> None:
     try:
         expenses = read_db(db_filepath)
     except (EOFError, FileNotFoundError):
         expenses = []
     
     try:
-        csv_content = import_from_csv(import_path)
+        csv_content = import_csv(import_path)
     except FileNotFoundError:
         print('File not exist.')
         sys.exit(5)
@@ -251,10 +251,10 @@ def import_csv(import_path: str, db_filepath: str, dt: str|None) -> None:
         sys.exit(9)
 
 
-@cli.command(help=HELP_EXPORT_CSV)
+@cli.command(help=HELP_EXPORT_TO)
 @click.argument('export_path')
 @click.option('--db-filepath', default=DEFAULT_DB_FILEPATH, help=HELP_OPTION_DB_FILEPATH)
-def export_csv(export_path: str, db_filepath: str) -> None:
+def export_to(export_path: str, db_filepath: str) -> None:
     try:
         expenses = read_db(db_filepath)
     except (EOFError, FileNotFoundError):
@@ -262,14 +262,14 @@ def export_csv(export_path: str, db_filepath: str) -> None:
         sys.exit(10)
     
     try:
-        export_to_csv(export_path, expenses)
+        export_csv(export_path, expenses)
         print(f'Saved as: {export_path}.')
     except FileExistsError:
         occurrency = 2
         while True:
             try: 
                 new_filepath = generate_new_name(export_path, occurrency)
-                export_to_csv(new_filepath, expenses)
+                export_csv(new_filepath, expenses)
                 print(f'Saved as: {new_filepath}.')
                 break
             except FileExistsError:

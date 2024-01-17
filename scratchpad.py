@@ -1,7 +1,5 @@
-# refactored some variable names in run.py
+# Changed name for expense class; "MyExpense" -> "UserExpense".
 
-# refactored some existed tests in test_run.py
+#Changed names for functions; ("import_from_csv", "export_to_csv") -> ("import-csv", "export-csv").
 
-# added test for cli command in test_run.py
-
-### testuje swój kod 
+# Changed names for cli subcommands; ("import-csv", "export-csv") -> ("import-from", "export-to").
