@@ -1,27 +1,3 @@
-from csv import DictReader, DictWriter
-from pickle import load, dump
-from datetime import date
-
-from click.testing import CliRunner
-from pytest import raises
-
-from run import (
-    MyExpense,
-    read_db,
-    generate_new_id_num,
-    generate_date,
-    create_expense,
-    add_new_expense,
-    write_db,
-    sort_expenses,
-    compute_total_expenses_value,
-    import_from_csv,
-    export_to_csv,
-    generate_new_name,
-    cli
-)
-
-
 """
 This script first tests the basic functions of run.py, mainly checking the happy path,
 except for functions where the raise statement is used: [create_expense, import_from_csv, import_to_csv].
@@ -51,6 +27,30 @@ cli subcommands:
 In all subcommands option "--db-filepath" is always used for testing purposes,
 so that a temporary directory can be used.
 """
+
+
+from csv import DictReader, DictWriter
+from pickle import load, dump
+from datetime import date
+
+from click.testing import CliRunner
+from pytest import raises
+
+from run import (
+    MyExpense,
+    read_db,
+    generate_new_id_num,
+    generate_date,
+    create_expense,
+    add_new_expense,
+    write_db,
+    sort_expenses,
+    compute_total_expenses_value,
+    import_from_csv,
+    export_to_csv,
+    generate_new_name,
+    cli
+)
 
 
 def test_read_db_check_content(tmp_path):
