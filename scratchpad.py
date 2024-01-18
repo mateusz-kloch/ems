@@ -1,1 +1,1 @@
-# Changed name for: expense class "MyExpense" -> "UserExpense", functions ("import_from_csv", "export_to_csv") -> ("import-csv", "export-csv"), cli subcommands ("import-csv", "export-csv") -> ("import-from", "export-to").
+# Improvment in import-from; import_csv. Improvment in extension detection for "cli" subcommands ("import-from", "export-to"). Tests adjusted to changes.

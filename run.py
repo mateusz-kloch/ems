@@ -18,8 +18,8 @@ HELP_REPORT = 'Viem expenses database as table.'
 HELP_OPTION_SORT = 'View expenses sorted by "date" or "value", by default they are sorted by id numbers.'
 HELP_OPTION_DESCENDING = 'View expenses in descending order, default: ascending.'
 HELP_OPTION_PYTHON = 'View expenses as python code representation.'
-HELP_IMPORT_FROM = 'Import data from file, supported file formats: csv.'
-HELP_EXPORT_TO = 'Export data to file, supported file formats: csv.'
+HELP_IMPORT_FROM = 'Import data from file, supported file formats: (csv).'
+HELP_EXPORT_TO = 'Export data to file, supported file formats: (csv).'
 
 
 @dataclass
@@ -103,21 +103,27 @@ def compute_total_expenses_value(expenses: list[UserExpense]) -> float:
     return total
 
 
+def detect_extension(filepath: str) -> str:
+    if filepath.endswith('.csv'):
+        file_type = 'csv'
+    else:
+        raise TypeError('Missing extension for file or unsupported file type.')
+    return file_type
+
+
 def import_csv(csv_filepath: str) -> list[UserExpense]:
     with open(csv_filepath, encoding='utf-8') as stream:
         reader = DictReader(stream)
-        csv_content = [row for row in reader]
-    if csv_content == []:
+        csv_expenses = [{'value': row['value'], 'desc': row['desc']} for row in reader]
+    if csv_expenses == []:
         raise ValueError('Missing file content.')
-    return csv_content
+    return csv_expenses
 
 
 def export_csv(csv_filepath: str, expenses: list[UserExpense]) -> None:
-    if not csv_filepath.endswith('.csv'):
-        raise ValueError('Missing extension for new file.')
-    fieldnames = ['id_num', 'dt', 'value', 'desc']
+    headers = ['id_num', 'dt', 'value', 'desc']
     with open(csv_filepath, 'x', encoding='utf-8') as stream:
-        writer = DictWriter(stream, fieldnames=fieldnames)
+        writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
         for expense in expenses:
             writer.writerow(
@@ -202,7 +208,7 @@ def report(db_filepath: str, sort: str|None, descending: bool, python: bool) -> 
                 big = '[!]'
             else:
                 big = ''
-            print(f'{expense.id_num:5}# {expense.dt:10} {expense.value:9} {big:^7} {expense.desc}')
+            print(f'{expense.id_num:5}# {expense.dt:10} {expense.value:9.2f} {big:^7} {expense.desc}')
         print('~~~~~~~~~~~~~~~~~')
         print(f'Total: {total:10.2f}')
 
@@ -213,33 +219,43 @@ def report(db_filepath: str, sort: str|None, descending: bool, python: bool) -> 
 @click.option('--dt', help=HELP_OPTION_DT)
 def import_from(import_path: str, db_filepath: str, dt: str|None) -> None:
     try:
+        file_type = detect_extension(import_path)
+    except TypeError as exception:
+        print(f'Error: {exception.args[0]}')
+        sys.exit(5)
+
+    try:
         expenses = read_db(db_filepath)
     except (EOFError, FileNotFoundError):
         expenses = []
     
-    try:
-        csv_content = import_csv(import_path)
-    except FileNotFoundError:
-        print('File not exist.')
-        sys.exit(5)
-    except ValueError as exception:
-        print(f'Error: {exception.args[0]}')
-        sys.exit(6)
+    if file_type == 'csv':
+        try:
+            csv_content = import_csv(import_path)
+        except FileNotFoundError:
+            print('File not exist.')
+            sys.exit(6)
+        except ValueError as exception:
+            print(f'Error: {exception.args[0]}')
+            sys.exit(7)
+        except KeyError:
+            print(f'Invalid headers in {import_path}.')
+            sys.exit(8)
     
     try:
         dt = generate_date(dt)
     except ValueError:
             print('Invalid date format.')
-            sys.exit(7)
+            sys.exit(9)
 
     for expense in csv_content:
         id_num = generate_new_id_num(expenses)
-        value , desc = expense.values()
+        value, desc = expense.values()
         try:
             new_expense = create_expense(id_num, dt, value, desc)
         except ValueError as exception:
             print(f'Error: {exception.args[0]}')
-            sys.exit(8)
+            sys.exit(10)
         
         updated_expenses = add_new_expense(expenses, new_expense)
     
@@ -248,7 +264,7 @@ def import_from(import_path: str, db_filepath: str, dt: str|None) -> None:
         print(f'Saved to: {db_filepath}.')
     except FileNotFoundError:
         print(f'There is no such path: {db_filepath}.')
-        sys.exit(9)
+        sys.exit(11)
 
 
 @cli.command(help=HELP_EXPORT_TO)
@@ -256,30 +272,34 @@ def import_from(import_path: str, db_filepath: str, dt: str|None) -> None:
 @click.option('--db-filepath', default=DEFAULT_DB_FILEPATH, help=HELP_OPTION_DB_FILEPATH)
 def export_to(export_path: str, db_filepath: str) -> None:
     try:
+        file_type = detect_extension(export_path)
+    except TypeError as exception:
+        print(f'Error: {exception.args[0]}')
+        sys.exit(12)
+    
+    try:
         expenses = read_db(db_filepath)
     except (EOFError, FileNotFoundError):
         print('No data has been entered yet, nothing to write.')
-        sys.exit(10)
+        sys.exit(13)
     
-    try:
-        export_csv(export_path, expenses)
-        print(f'Saved as: {export_path}.')
-    except FileExistsError:
-        occurrency = 2
-        while True:
-            try: 
-                new_filepath = generate_new_name(export_path, occurrency)
-                export_csv(new_filepath, expenses)
-                print(f'Saved as: {new_filepath}.')
-                break
-            except FileExistsError:
-                occurrency += 1
-    except FileNotFoundError:
-        print(f'There is no such path: {export_path}.')
-        sys.exit(11)
-    except ValueError as extension:
-        print(f'Error: {extension.args[0]}')
-        sys.exit(12)
+    if file_type == 'csv':
+        try:
+            export_csv(export_path, expenses)
+            print(f'Saved as: {export_path}.')
+        except FileExistsError:
+            occurrency = 2
+            while True:
+                try: 
+                    new_filepath = generate_new_name(export_path, occurrency)
+                    export_csv(new_filepath, expenses)
+                    print(f'Saved as: {new_filepath}.')
+                    break
+                except FileExistsError:
+                    occurrency += 1
+        except FileNotFoundError:
+            print(f'There is no such path: {export_path}.')
+            sys.exit(14)
 
 
 if __name__ == '__main__':

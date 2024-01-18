@@ -1,6 +1,6 @@
 """
 This script first tests the basic functions of run.py, mainly checking the happy path,
-except for functions where the raise statement is used: [create_expense, import_csv, import_to_csv].
+except for functions where the raise statement is used: [create_expense, detect_extension, import_csv].
 
 Refers to: 
     - read_db
@@ -11,6 +11,7 @@ Refers to:
     - write_db
     - sort_expenses
     - compute_total_expenses_value
+    - detect_extension
     - import_csv
     - export_csv
     - generate_new_name
@@ -46,6 +47,7 @@ from run import (
     write_db,
     sort_expenses,
     compute_total_expenses_value,
+    detect_extension,
     import_csv,
     export_csv,
     generate_new_name,
@@ -146,7 +148,7 @@ def test_generate_date_no_input():
     assert got == expect
 
 
-def test_create_expense_happy_path():
+def test_create_expense():
     id_num = 1
     dt = '12/11/2023'
     value = 3
@@ -249,9 +251,12 @@ def test_write_db_file_exist(tmp_path):
         UserExpense(id_num=2, dt='01/02/2023', value=1.0, desc='second expense')
     ]
     db_filepath = tmp_path/'tmp_file'
-    db_file = open(db_filepath, 'wb')
+    db_file = open(db_filepath, 'w')
     db_file.close()
     write_db(db_filepath, expenses)
+    with open(db_filepath, 'rb') as stream:
+        restored = load(stream)
+    assert expenses == restored
     assert len(list(tmp_path.iterdir())) == 1
 
 
@@ -262,19 +267,10 @@ def test_write_db_file_not_exist(tmp_path):
     ]
     db_filepath = tmp_path/'tmp_file'
     write_db(db_filepath, expenses)
-    assert len(list(tmp_path.iterdir())) == 1
-
-
-def test_write_db_check_content(tmp_path):
-    expenses = [
-        UserExpense(id_num=1, dt='01/02/2023', value=1.0, desc='first expense'),
-        UserExpense(id_num=2, dt='01/02/2023', value=1.0, desc='second expense')
-    ]
-    db_filepath = tmp_path/'tmp_file'
-    write_db(db_filepath, expenses)
     with open(db_filepath, 'rb') as stream:
         restored = load(stream)
     assert expenses == restored
+    assert len(list(tmp_path.iterdir())) == 1
 
 
 def test_sort_expeses_by_id_nums_descending_false():
@@ -398,13 +394,44 @@ def test_compute_total_expenses_value_2_expenses():
     assert got == expect
 
 
-def test_import_csv_happy_path(tmp_path):
+def test_detect_extension():
+    csv_filepath = 'dir/file.csv'
+    got = detect_extension(csv_filepath)
+    expect = 'csv'
+    assert got == expect
+
+
+def test_detect_extension_invalid_extension():
+    csv_filepath = 'dir/file.wa'
+    with raises(TypeError) as exception:
+        detect_extension(csv_filepath)
+    assert exception.type == TypeError
+    assert str(exception.value) == 'Missing extension for file or unsupported file type.'
+
+
+def test_detect_extension_missing_extension():
+    csv_filepath = 'dir/file'
+    with raises(TypeError) as exception:
+        detect_extension(csv_filepath)
+    assert exception.type == TypeError
+    assert str(exception.value) == 'Missing extension for file or unsupported file type.'
+
+
+def test_detect_extension_another_missing_extension():
+    csv_filepath = 'dir/file.'
+    with raises(TypeError) as exception:
+        detect_extension(csv_filepath)
+    assert exception.type == TypeError
+    assert str(exception.value) == 'Missing extension for file or unsupported file type.'
+
+
+def test_import_csv(tmp_path):
     value = 1
     desc = 'first expense'
-    fieldnames = ['value', 'desc']
+    headers = ['value', 'desc']
     csv_filepath = tmp_path/'file.csv'
     with open(csv_filepath, 'x', encoding='utf-8') as stream:
-        writer = DictWriter(stream, fieldnames=fieldnames)
+        writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
         writer.writerow(
             {
@@ -418,21 +445,21 @@ def test_import_csv_happy_path(tmp_path):
 
 
 def test_import_csv_empty_file(tmp_path):
-    fieldnames = ['value', 'desc']
+    headers = ['value', 'desc']
     csv_filepath = tmp_path/'file.csv'
     with open(csv_filepath, 'x', encoding='utf-8') as stream:
-        DictWriter(stream, fieldnames=fieldnames)
+        DictWriter(stream, fieldnames=headers)
     with raises(ValueError) as exception:
         import_csv(csv_filepath)
     assert exception.type == ValueError
     assert str(exception.value) == 'Missing file content.'
 
 
-def test_import_csv_only_fieldnames_in_file(tmp_path):
-    fieldnames = ['value', 'desc']
+def test_import_csv_only_headers_in_file(tmp_path):
+    headers = ['value', 'desc']
     csv_filepath = tmp_path/'file.csv'
     with open(csv_filepath, 'x', encoding='utf-8') as stream:
-        writer = DictWriter(stream, fieldnames=fieldnames)
+        writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
     with raises(ValueError) as exception:
         import_csv(csv_filepath)
@@ -440,7 +467,7 @@ def test_import_csv_only_fieldnames_in_file(tmp_path):
     assert str(exception.value) == 'Missing file content.'
 
 
-def test_export_csv_happy_path(tmp_path):
+def test_export_csv(tmp_path):
     csv_filepath = tmp_path/'file.csv'
     expenses = [
         UserExpense(id_num=1, dt='12/03/2023', value=1.0, desc='first expense')
@@ -451,17 +478,6 @@ def test_export_csv_happy_path(tmp_path):
         got = [row for row in reader]
     expect = [{'desc': 'first expense', 'dt': '12/03/2023', 'id_num': '1', 'value': '1.0'}]
     assert got == expect
-
-
-def test_export_csv_no_extension_in_filepath(tmp_path):
-    csv_filepath = tmp_path/'file'
-    expenses = [
-        UserExpense(id_num=1, dt='12/03/2023', value=1.0, desc='first expense')
-    ]
-    with raises(ValueError) as exception:
-        export_csv(str(csv_filepath), expenses)
-    assert exception.type == ValueError
-    assert str(exception.value) == 'Missing extension for new file.'
 
 
 def test_generate_new_name_occurrency_2():
@@ -700,7 +716,7 @@ def test_report_db_filepath_show_big(tmp_path):
     runner = CliRunner()
     result = runner.invoke(cli, ['report', '--db-filepath', db_filepath])
     assert result.exit_code == 0
-    assert result.output.strip() == '~~ID~~ ~~~DATE~~~ ~~VALUE~~ ~~BIG~~ ~~~DESCRIPTION~~~\n~~~~~~ ~~~~~~~~~~ ~~~~~~~~~ ~~~~~~~ ~~~~~~~~~~~~~~~~~\n    1# 13/11/1954       499         first expense\n    2# 12/03/2023       500   [!]   second expense\n~~~~~~~~~~~~~~~~~\nTotal:     999.00'
+    assert result.output.strip() == '~~ID~~ ~~~DATE~~~ ~~VALUE~~ ~~BIG~~ ~~~DESCRIPTION~~~\n~~~~~~ ~~~~~~~~~~ ~~~~~~~~~ ~~~~~~~ ~~~~~~~~~~~~~~~~~\n    1# 13/11/1954    499.00         first expense\n    2# 12/03/2023    500.00   [!]   second expense\n~~~~~~~~~~~~~~~~~\nTotal:     999.00'
 
 
 def test_report_db_filepath_sort_default(tmp_path):
@@ -715,7 +731,7 @@ def test_report_db_filepath_sort_default(tmp_path):
     runner = CliRunner()
     result = runner.invoke(cli, ['report', '--db-filepath', db_filepath])
     assert result.exit_code == 0
-    assert result.output.strip() == '~~ID~~ ~~~DATE~~~ ~~VALUE~~ ~~BIG~~ ~~~DESCRIPTION~~~\n~~~~~~ ~~~~~~~~~~ ~~~~~~~~~ ~~~~~~~ ~~~~~~~~~~~~~~~~~\n    1# 13/11/1954    124.65         first expense\n    2# 12/09/2021       300         second expense\n    3# 02/05/1999       499         third expense\n~~~~~~~~~~~~~~~~~\nTotal:     923.65'
+    assert result.output.strip() == '~~ID~~ ~~~DATE~~~ ~~VALUE~~ ~~BIG~~ ~~~DESCRIPTION~~~\n~~~~~~ ~~~~~~~~~~ ~~~~~~~~~ ~~~~~~~ ~~~~~~~~~~~~~~~~~\n    1# 13/11/1954    124.65         first expense\n    2# 12/09/2021    300.00         second expense\n    3# 02/05/1999    499.00         third expense\n~~~~~~~~~~~~~~~~~\nTotal:     923.65'
 
 
 def test_report_db_filepath_sort_default_descending(tmp_path):
@@ -730,7 +746,7 @@ def test_report_db_filepath_sort_default_descending(tmp_path):
     runner = CliRunner()
     result = runner.invoke(cli, ['report', '--db-filepath', db_filepath, '--descending'])
     assert result.exit_code == 0
-    assert result.output.strip() == '~~ID~~ ~~~DATE~~~ ~~VALUE~~ ~~BIG~~ ~~~DESCRIPTION~~~\n~~~~~~ ~~~~~~~~~~ ~~~~~~~~~ ~~~~~~~ ~~~~~~~~~~~~~~~~~\n    3# 02/05/1999       499         third expense\n    2# 12/09/2021       300         second expense\n    1# 13/11/1954    124.65         first expense\n~~~~~~~~~~~~~~~~~\nTotal:     923.65'
+    assert result.output.strip() == '~~ID~~ ~~~DATE~~~ ~~VALUE~~ ~~BIG~~ ~~~DESCRIPTION~~~\n~~~~~~ ~~~~~~~~~~ ~~~~~~~~~ ~~~~~~~ ~~~~~~~~~~~~~~~~~\n    3# 02/05/1999    499.00         third expense\n    2# 12/09/2021    300.00         second expense\n    1# 13/11/1954    124.65         first expense\n~~~~~~~~~~~~~~~~~\nTotal:     923.65'
 
 
 def test_report_db_filepath_sort_date(tmp_path):
@@ -745,7 +761,7 @@ def test_report_db_filepath_sort_date(tmp_path):
     runner = CliRunner()
     result = runner.invoke(cli, ['report', '--db-filepath', db_filepath, '--sort', 'date',])
     assert result.exit_code == 0
-    assert result.output.strip() == '~~ID~~ ~~~DATE~~~ ~~VALUE~~ ~~BIG~~ ~~~DESCRIPTION~~~\n~~~~~~ ~~~~~~~~~~ ~~~~~~~~~ ~~~~~~~ ~~~~~~~~~~~~~~~~~\n    1# 13/11/1954    124.65         first expense\n    3# 02/05/1999       499         third expense\n    2# 12/09/2021       300         second expense\n~~~~~~~~~~~~~~~~~\nTotal:     923.65'
+    assert result.output.strip() == '~~ID~~ ~~~DATE~~~ ~~VALUE~~ ~~BIG~~ ~~~DESCRIPTION~~~\n~~~~~~ ~~~~~~~~~~ ~~~~~~~~~ ~~~~~~~ ~~~~~~~~~~~~~~~~~\n    1# 13/11/1954    124.65         first expense\n    3# 02/05/1999    499.00         third expense\n    2# 12/09/2021    300.00         second expense\n~~~~~~~~~~~~~~~~~\nTotal:     923.65'
 
 
 def test_report_db_filepath_sort_date_descending(tmp_path):
@@ -760,7 +776,7 @@ def test_report_db_filepath_sort_date_descending(tmp_path):
     runner = CliRunner()
     result = runner.invoke(cli, ['report', '--db-filepath', db_filepath, '--sort', 'date', '--descending'])
     assert result.exit_code == 0
-    assert result.output.strip() == '~~ID~~ ~~~DATE~~~ ~~VALUE~~ ~~BIG~~ ~~~DESCRIPTION~~~\n~~~~~~ ~~~~~~~~~~ ~~~~~~~~~ ~~~~~~~ ~~~~~~~~~~~~~~~~~\n    2# 12/09/2021       300         second expense\n    3# 02/05/1999       499         third expense\n    1# 13/11/1954    124.65         first expense\n~~~~~~~~~~~~~~~~~\nTotal:     923.65'
+    assert result.output.strip() == '~~ID~~ ~~~DATE~~~ ~~VALUE~~ ~~BIG~~ ~~~DESCRIPTION~~~\n~~~~~~ ~~~~~~~~~~ ~~~~~~~~~ ~~~~~~~ ~~~~~~~~~~~~~~~~~\n    2# 12/09/2021    300.00         second expense\n    3# 02/05/1999    499.00         third expense\n    1# 13/11/1954    124.65         first expense\n~~~~~~~~~~~~~~~~~\nTotal:     923.65'
 
 
 def test_report_db_filepath_sort_value(tmp_path):
@@ -775,7 +791,7 @@ def test_report_db_filepath_sort_value(tmp_path):
     runner = CliRunner()
     result = runner.invoke(cli, ['report', '--db-filepath', db_filepath, '--sort', 'value',])
     assert result.exit_code == 0
-    assert result.output.strip() == '~~ID~~ ~~~DATE~~~ ~~VALUE~~ ~~BIG~~ ~~~DESCRIPTION~~~\n~~~~~~ ~~~~~~~~~~ ~~~~~~~~~ ~~~~~~~ ~~~~~~~~~~~~~~~~~\n    1# 13/11/1954    124.65         first expense\n    2# 12/09/2021       300         second expense\n    3# 02/05/1999       499         third expense\n~~~~~~~~~~~~~~~~~\nTotal:     923.65'
+    assert result.output.strip() == '~~ID~~ ~~~DATE~~~ ~~VALUE~~ ~~BIG~~ ~~~DESCRIPTION~~~\n~~~~~~ ~~~~~~~~~~ ~~~~~~~~~ ~~~~~~~ ~~~~~~~~~~~~~~~~~\n    1# 13/11/1954    124.65         first expense\n    2# 12/09/2021    300.00         second expense\n    3# 02/05/1999    499.00         third expense\n~~~~~~~~~~~~~~~~~\nTotal:     923.65'
 
 
 def test_report_db_filepath_sort_value_descending(tmp_path):
@@ -790,7 +806,7 @@ def test_report_db_filepath_sort_value_descending(tmp_path):
     runner = CliRunner()
     result = runner.invoke(cli, ['report', '--db-filepath', db_filepath, '--sort', 'value', '--descending'])
     assert result.exit_code == 0
-    assert result.output.strip() == '~~ID~~ ~~~DATE~~~ ~~VALUE~~ ~~BIG~~ ~~~DESCRIPTION~~~\n~~~~~~ ~~~~~~~~~~ ~~~~~~~~~ ~~~~~~~ ~~~~~~~~~~~~~~~~~\n    3# 02/05/1999       499         third expense\n    2# 12/09/2021       300         second expense\n    1# 13/11/1954    124.65         first expense\n~~~~~~~~~~~~~~~~~\nTotal:     923.65'
+    assert result.output.strip() == '~~ID~~ ~~~DATE~~~ ~~VALUE~~ ~~BIG~~ ~~~DESCRIPTION~~~\n~~~~~~ ~~~~~~~~~~ ~~~~~~~~~ ~~~~~~~ ~~~~~~~~~~~~~~~~~\n    3# 02/05/1999    499.00         third expense\n    2# 12/09/2021    300.00         second expense\n    1# 13/11/1954    124.65         first expense\n~~~~~~~~~~~~~~~~~\nTotal:     923.65'
 
 
 def test_report_show_python_code(tmp_path):
@@ -827,9 +843,9 @@ def test_import_from_with_content_expenses_empty(tmp_path):
     db_filepath = tmp_path/'file.db'
     db_file = open(db_filepath, 'wb')
     db_file.close()
-    fieldnames = ['value', 'desc']
+    headers = ['value', 'desc']
     with open(csv_filepath, 'x', encoding='utf-8') as stream:
-        writer = DictWriter(stream, fieldnames=fieldnames)
+        writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
         writer.writerow({'value': 10, 'desc': 'first expense'})
     runner = CliRunner()
@@ -846,9 +862,9 @@ def test_import_from_with_content_expenses_empty(tmp_path):
 def test_import_from_with_content_expenses_not_exist(tmp_path):
     csv_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.db'
-    fieldnames = ['value', 'desc']
+    headers = ['value', 'desc']
     with open(csv_filepath, 'x', encoding='utf-8') as stream:
-        writer = DictWriter(stream, fieldnames=fieldnames)
+        writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
         writer.writerow({'value': 10, 'desc': 'first expense'})
     runner = CliRunner()
@@ -866,9 +882,9 @@ def test_import_from_with_content_user_dt(tmp_path):
     dt = '23.05.1984'
     csv_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.db'
-    fieldnames = ['value', 'desc']
+    headers = ['value', 'desc']
     with open(csv_filepath, 'x', encoding='utf-8') as stream:
-        writer = DictWriter(stream, fieldnames=fieldnames)
+        writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
         writer.writerow({'value': 10, 'desc': 'first expense'})
     runner = CliRunner()
@@ -879,27 +895,63 @@ def test_import_from_with_content_user_dt(tmp_path):
     assert restored == expect
     assert result.exit_code == 0
     assert result.output.strip() == f'Saved to: {db_filepath}.'
-    
+
+
+def test_import_from_missing_extension_in_csv_filepath(tmp_path):
+    expenses = [UserExpense(id_num=1, dt='15/09/1857', value=567, desc='first expension')]
+    csv_filepath = str(tmp_path/'file')
+    db_filepath = tmp_path/'file.db'
+    with open(db_filepath, 'wb') as stream:
+        dump(expenses, stream)
+    runner = CliRunner()
+    result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
+    assert result.exit_code == 5
+    assert result.output.strip() == 'Error: Missing extension for file or unsupported file type.'
+
+
+def test_import_from_invalid_extension_in_csv_filepath(tmp_path):
+    expenses = [UserExpense(id_num=1, dt='15/09/1857', value=567, desc='first expension')]
+    csv_filepath = str(tmp_path/'file.aw')
+    db_filepath = tmp_path/'file.db'
+    with open(db_filepath, 'wb') as stream:
+        dump(expenses, stream)
+    runner = CliRunner()
+    result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
+    assert result.exit_code == 5
+    assert result.output.strip() == 'Error: Missing extension for file or unsupported file type.'
+
+
+def test_import_from_another_invalid_extension_in_csv_filepath(tmp_path):
+    expenses = [UserExpense(id_num=1, dt='15/09/1857', value=567, desc='first expension')]
+    csv_filepath = str(tmp_path/'file.')
+    db_filepath = tmp_path/'file.db'
+    with open(db_filepath, 'wb') as stream:
+        dump(expenses, stream)
+    runner = CliRunner()
+    result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
+    assert result.exit_code == 5
+    assert result.output.strip() == 'Error: Missing extension for file or unsupported file type.'
+
 
 def test_import_from_csv_not_exist(tmp_path):
     csv_filepath = 'not_exist_file.csv'
     db_filepath = tmp_path/'file.db'
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 5
+    assert result.exit_code == 6
     assert result.output.strip() == 'File not exist.'
 
 
-def test_import_from_only_fieldnames_in_csv(tmp_path):
+def test_import_from_only_headers_in_csv(tmp_path):
     csv_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.db'
-    fieldnames = ['value', 'desc']
+    headers = ['value', 'desc']
     with open(csv_filepath, 'x', encoding='utf-8') as stream:
-        writer = DictWriter(stream, fieldnames=fieldnames)
+        writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 6
+    assert result.exit_code == 7
     assert result.output.strip() == 'Error: Missing file content.'
 
 
@@ -910,120 +962,134 @@ def test_import_from_empty_csv(tmp_path):
     stream.close()
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 6
+    assert result.exit_code == 7
     assert result.output.strip() == 'Error: Missing file content.'
+
+
+def test_import_from_invalid_headers_in_csv(tmp_path):
+    csv_filepath = str(tmp_path/'file.csv')
+    db_filepath = tmp_path/'file.db'
+    headers = ['inv_value', 'inv_desc']
+    with open(csv_filepath, 'x', encoding='utf-8') as stream:
+        writer = DictWriter(stream, fieldnames=headers)
+        writer.writeheader()
+        writer.writerow({'inv_value': 10, 'inv_desc': 'first expense'})
+    runner = CliRunner()
+    result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
+    assert result.exit_code == 8
+    assert result.output.strip() == f'Invalid headers in {csv_filepath}.'
 
 
 def test_import_from_invalid_user_dt(tmp_path):
     dt = 'awd1'
     csv_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.db'
-    fieldnames = ['value', 'desc']
+    headers = ['value', 'desc']
     with open(csv_filepath, 'x', encoding='utf-8') as stream:
-        writer = DictWriter(stream, fieldnames=fieldnames)
+        writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
         writer.writerow({'value': 10, 'desc': 'first expense'})
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath, '--dt', dt])
-    assert result.exit_code == 7
+    assert result.exit_code == 9
     assert result.output.strip() == 'Invalid date format.'
 
 
 def test_import_from_0_value_in_csv(tmp_path):
     csv_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.db'
-    fieldnames = ['value', 'desc']
+    headers = ['value', 'desc']
     with open(csv_filepath, 'x', encoding='utf-8') as stream:
-        writer = DictWriter(stream, fieldnames=fieldnames)
+        writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
         writer.writerow({'value': 0, 'desc': 'first expense'})
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 8
+    assert result.exit_code == 10
     assert result.output.strip() == 'Error: The expense cannot be equal to zero.'
 
 
 def test_import_from_negative_value_in_csv(tmp_path):
     csv_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.db'
-    fieldnames = ['value', 'desc']
+    headers = ['value', 'desc']
     with open(csv_filepath, 'x', encoding='utf-8') as stream:
-        writer = DictWriter(stream, fieldnames=fieldnames)
+        writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
         writer.writerow({'value': -1, 'desc': 'first expense'})
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 8
+    assert result.exit_code == 10
     assert result.output.strip() == 'Error: The expense cannot be negative.'
 
 
 def test_import_from_no_desc_in_csv(tmp_path):
     csv_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.db'
-    fieldnames = ['value', 'desc']
+    headers = ['value', 'desc']
     with open(csv_filepath, 'x', encoding='utf-8') as stream:
-        writer = DictWriter(stream, fieldnames=fieldnames)
+        writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
         writer.writerow({'value': 10, 'desc': ''})
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 8
+    assert result.exit_code == 10
     assert result.output.strip() == 'Error: Missing name for new expense.'
 
 
 def test_import_from_space_desc_in_csv(tmp_path):
     csv_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.db'
-    fieldnames = ['value', 'desc']
+    headers = ['value', 'desc']
     with open(csv_filepath, 'x', encoding='utf-8') as stream:
-        writer = DictWriter(stream, fieldnames=fieldnames)
+        writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
         writer.writerow({'value': 10, 'desc': ' '})
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 8
+    assert result.exit_code == 10
     assert result.output.strip() == 'Error: Missing name for new expense.'
 
 
 def test_import_from_tab_desc_in_csv(tmp_path):
     csv_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.db'
-    fieldnames = ['value', 'desc']
+    headers = ['value', 'desc']
     with open(csv_filepath, 'x', encoding='utf-8') as stream:
-        writer = DictWriter(stream, fieldnames=fieldnames)
+        writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
         writer.writerow({'value': 10, 'desc': ' '})
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 8
+    assert result.exit_code == 10
     assert result.output.strip() == 'Error: Missing name for new expense.'
 
 
 def test_import_from_new_line_desc_in_csv(tmp_path):
     csv_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.db'
-    fieldnames = ['value', 'desc']
+    headers = ['value', 'desc']
     with open(csv_filepath, 'x', encoding='utf-8') as stream:
-        writer = DictWriter(stream, fieldnames=fieldnames)
+        writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
         writer.writerow({'value': 10, 'desc': '\n'})
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 8
+    assert result.exit_code == 10
     assert result.output.strip() == 'Error: Missing name for new expense.'
 
 
 def test_import_from_invalid_db_path(tmp_path):
     csv_filepath = str(tmp_path/'file.csv')
     db_filepath = 'invalid_dir/file.db'
-    fieldnames = ['value', 'desc']
+    headers = ['value', 'desc']
     with open(csv_filepath, 'x', encoding='utf-8') as stream:
-        writer = DictWriter(stream, fieldnames=fieldnames)
+        writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
         writer.writerow({'value': 10, 'desc': 'first expense'})
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 9
+    assert result.exit_code == 11
     assert result.output.strip() == f'There is no such path: {db_filepath}.'
 
 
@@ -1092,12 +1158,48 @@ def test_export_to_2_csv_filepath_already_exist(tmp_path):
     assert result.output.strip() == f'Saved as: {first_csv_filepath}.'
 
 
+def test_export_to_missing_extension_in_csv_filepath(tmp_path):
+    expenses = [UserExpense(id_num=1, dt='15/09/1857', value=567, desc='first expension')]
+    csv_filepath = str(tmp_path/'file')
+    db_filepath = tmp_path/'file.db'
+    with open(db_filepath, 'wb') as stream:
+        dump(expenses, stream)
+    runner = CliRunner()
+    result = runner.invoke(cli, ['export-to', csv_filepath, '--db-filepath', db_filepath])
+    assert result.exit_code == 12
+    assert result.output.strip() == 'Error: Missing extension for file or unsupported file type.'
+
+
+def test_export_to_invalid_extension_in_csv_filepath(tmp_path):
+    expenses = [UserExpense(id_num=1, dt='15/09/1857', value=567, desc='first expension')]
+    csv_filepath = str(tmp_path/'file.1a')
+    db_filepath = tmp_path/'file.db'
+    with open(db_filepath, 'wb') as stream:
+        dump(expenses, stream)
+    runner = CliRunner()
+    result = runner.invoke(cli, ['export-to', csv_filepath, '--db-filepath', db_filepath])
+    assert result.exit_code == 12
+    assert result.output.strip() == 'Error: Missing extension for file or unsupported file type.'
+
+
+def test_export_to_another_invalid_extension_in_csv_filepath(tmp_path):
+    expenses = [UserExpense(id_num=1, dt='15/09/1857', value=567, desc='first expension')]
+    csv_filepath = str(tmp_path/'file.')
+    db_filepath = tmp_path/'file.db'
+    with open(db_filepath, 'wb') as stream:
+        dump(expenses, stream)
+    runner = CliRunner()
+    result = runner.invoke(cli, ['export-to', csv_filepath, '--db-filepath', db_filepath])
+    assert result.exit_code == 12
+    assert result.output.strip() == 'Error: Missing extension for file or unsupported file type.'
+
+
 def test_export_to_db_file_not_exist(tmp_path):
     csv_filepath = str(tmp_path/'file.csv')
     db_filepath = 'not_exist_file.db'
     runner = CliRunner()
     result = runner.invoke(cli, ['export-to', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 10
+    assert result.exit_code == 13
     assert result.output.strip() == 'No data has been entered yet, nothing to write.'
 
 
@@ -1108,7 +1210,7 @@ def test_export_to_empty_db_file(tmp_path):
     db_file.close()
     runner = CliRunner()
     result = runner.invoke(cli, ['export-to', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 10
+    assert result.exit_code == 13
     assert result.output.strip() == 'No data has been entered yet, nothing to write.'
 
 
@@ -1120,17 +1222,5 @@ def test_export_to_invalid_csv_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['export-to', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 11
+    assert result.exit_code == 14
     assert result.output.strip() == f'There is no such path: {csv_filepath}.'
-
-
-def test_export_to_missing_extension_in_csv_filepath(tmp_path):
-    expenses = [UserExpense(id_num=1, dt='15/09/1857', value=567, desc='first expension')]
-    csv_filepath = str(tmp_path/'file')
-    db_filepath = tmp_path/'file.db'
-    with open(db_filepath, 'wb') as stream:
-        dump(expenses, stream)
-    runner = CliRunner()
-    result = runner.invoke(cli, ['export-to', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 12
-    assert result.output.strip() == 'Error: Missing extension for new file.'
