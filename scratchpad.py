@@ -1,1 +1,0 @@
-# Improvment in import-from; import_csv. Improvment in extension detection for "cli" subcommands ("import-from", "export-to"). Tests adjusted to changes.
