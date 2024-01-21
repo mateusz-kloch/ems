@@ -38,7 +38,7 @@ from datetime import date
 from click.testing import CliRunner
 from pytest import raises
 
-from run import (
+from src.run import (
     UserExpense,
     read_db,
     generate_new_id_num,

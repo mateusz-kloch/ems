@@ -16,6 +16,8 @@ Management is done via text mode in the terminal, and uses click library to divi
     - report
     - import-from
     - export-to
+
+For usage examples, see the commands docs.
 """
 
 
@@ -29,7 +31,7 @@ import click
 from dateutil import parser
 
 
-DEFAULT_DB_FILEPATH = 'budget.db'
+DEFAULT_DB_FILEPATH = 'src/data/budget.db'
 DT_FORMAT = '%d/%m/%Y'
 BIG_EXPENSE_THRESHOLD = 500
 HELP_ADD = 'Add new expense to datebase.'
@@ -421,6 +423,8 @@ def import_from(import_path: str, db_filepath: str, dt: str|None) -> None:
         python run.py import-from dir/file.csv
         python run.py import-from "some dir/file.csv" --db-filepath=dir/database.db
         python run.py import-from dir/dir/file.csv --dt=13-05-2005
+    
+    Path to a sample csv file with expenses: src/data/example_expenses.csv
     """
     try:
         file_type = specify_filetype(import_path)
