@@ -1,10 +1,12 @@
-__pycache__
+__pycache__/
 
-.pytest_cache
+.pytest_cache/
 
 tests/__pycache__/
 
-tests/.pytest_cache
+tests/.pytest_cache/
+
+venv/
 
 notes.txt
 
