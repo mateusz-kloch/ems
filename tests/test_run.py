@@ -36,7 +36,7 @@ from pickle import load, dump
 from datetime import date
 
 from click.testing import CliRunner
-from pytest import raises
+import pytest
 
 from src.run import (
     UserExpense,
@@ -229,7 +229,7 @@ def test_create_expense_zero_value():
     dt = '12/11/2023'
     value = 0
     desc = 'first expense'
-    with raises(ValueError) as exception:
+    with pytest.raises(ValueError) as exception:
         create_expense(id_num, dt, value, desc)
     assert exception.type == ValueError
     assert str(exception.value) == 'The expense cannot be equal to zero.'
@@ -245,7 +245,7 @@ def test_create_expense_negative_value():
     dt = '12/11/2023'
     value = -3
     desc = 'first expense'
-    with raises(ValueError) as exception:
+    with pytest.raises(ValueError) as exception:
         create_expense(id_num, dt, value, desc)
     assert exception.type == ValueError
     assert str(exception.value) == 'The expense cannot be negative.'
@@ -261,7 +261,7 @@ def test_create_expense_none_desc():
     dt = '12/11/2023'
     value = 3
     desc = None
-    with raises(ValueError) as exception:
+    with pytest.raises(ValueError) as exception:
         create_expense(id_num, dt, value, desc)
     assert exception.type == ValueError
     assert str(exception.value) == 'Missing name for new expense.'
@@ -277,7 +277,7 @@ def test_create_expense_empty_desc():
     dt = '12/11/2023'
     value = 3
     desc = ''
-    with raises(ValueError) as exception:
+    with pytest.raises(ValueError) as exception:
         create_expense(id_num, dt, value, desc)
     assert exception.type == ValueError
     assert str(exception.value) == 'Missing name for new expense.'
@@ -293,7 +293,7 @@ def test_create_expense_space_desc():
     dt = '12/11/2023'
     value = 3
     desc = ' '
-    with raises(ValueError) as exception:
+    with pytest.raises(ValueError) as exception:
         create_expense(id_num, dt, value, desc)
     assert exception.type == ValueError
     assert str(exception.value) == 'Missing name for new expense.'
@@ -309,7 +309,7 @@ def test_create_expense_tab_desc():
     dt = '12/11/2023'
     value = 3
     desc = '    '
-    with raises(ValueError) as exception:
+    with pytest.raises(ValueError) as exception:
         create_expense(id_num, dt, value, desc)
     assert exception.type == ValueError
     assert str(exception.value) == 'Missing name for new expense.'
@@ -325,7 +325,7 @@ def test_create_expense_new_line_desc():
     dt = '12/11/2023'
     value = 3
     desc = '\n'
-    with raises(ValueError) as exception:
+    with pytest.raises(ValueError) as exception:
         create_expense(id_num, dt, value, desc)
     assert exception.type == ValueError
     assert str(exception.value) == 'Missing name for new expense.'
@@ -564,7 +564,7 @@ def test_specify_filetype_unsupported_extension():
     This test checks that specify_filetype correctly correctly reports a "TypeError" if an unsupported file extension is passed.
     """
     csv_filepath = 'dir/file.txt'
-    with raises(TypeError) as exception:
+    with pytest.raises(TypeError) as exception:
         specify_filetype(csv_filepath)
     assert exception.type == TypeError
     assert str(exception.value) == 'Missing extension for file or unsupported file type.'
@@ -577,7 +577,7 @@ def test_specify_filetype_invalid_extension():
     This test checks that specify_filetype correctly correctly reports a "TypeError" if an invalid file extension is passed.
     """
     csv_filepath = 'dir/file.wa'
-    with raises(TypeError) as exception:
+    with pytest.raises(TypeError) as exception:
         specify_filetype(csv_filepath)
     assert exception.type == TypeError
     assert str(exception.value) == 'Missing extension for file or unsupported file type.'
@@ -590,7 +590,7 @@ def test_specify_filetype_missing_extension():
     This test checks that specify_filetype correctly correctly reports a "TypeError" if a file extension was not passed.
     """
     csv_filepath = 'dir/file'
-    with raises(TypeError) as exception:
+    with pytest.raises(TypeError) as exception:
         specify_filetype(csv_filepath)
     assert exception.type == TypeError
     assert str(exception.value) == 'Missing extension for file or unsupported file type.'
@@ -603,7 +603,7 @@ def test_specify_filetype_another_missing_extension():
     This test checks that specify_filetype correctly correctly reports a "TypeError" if a file extension was not passed but there is dot at end of filepath.
     """
     csv_filepath = 'dir/file.'
-    with raises(TypeError) as exception:
+    with pytest.raises(TypeError) as exception:
         specify_filetype(csv_filepath)
     assert exception.type == TypeError
     assert str(exception.value) == 'Missing extension for file or unsupported file type.'
@@ -643,7 +643,7 @@ def test_import_csv_empty_file(tmp_path):
     csv_filepath = tmp_path/'file.csv'
     with open(csv_filepath, 'x', encoding='utf-8') as stream:
         DictWriter(stream, fieldnames=headers)
-    with raises(ValueError) as exception:
+    with pytest.raises(ValueError) as exception:
         import_csv(csv_filepath)
     assert exception.type == ValueError
     assert str(exception.value) == 'Missing file content.'
@@ -660,7 +660,7 @@ def test_import_csv_only_headers_in_file(tmp_path):
     with open(csv_filepath, 'x', encoding='utf-8') as stream:
         writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
-    with raises(ValueError) as exception:
+    with pytest.raises(ValueError) as exception:
         import_csv(csv_filepath)
     assert exception.type == ValueError
     assert str(exception.value) == 'Missing file content.'
