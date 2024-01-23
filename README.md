@@ -8,7 +8,7 @@ This is my extension of the project from module 7 completed during the Praktyczn
 
 ### The expense consists of:
 - identification number - number that is assigned by the program when creating an expense
-- date - format: "dd/mm/yyyy", by default program uses today's date but it is possibility to add own (see: Usage)
+- date - format: "dd/mm/yyyy", by default program uses today's date but it is possibility to add own (see: Usage).
 - value
 - description
 
@@ -60,17 +60,17 @@ Tip: All options of each command can be used in any configuration.
     python run.py add 149.99 "Telephon installment"
 This command will add a new epense to the database file (default: "data/budget.db"). If the database does not already exist, a new one will be started.
     
-    python run.py add 50 "Small shopping" --db-filepath="custom_dir/custom_file.db"
+    python run.py add 50 "Small shopping" --db-filepath=custom_dir/custom_file.db
 This command with the "--db-filepath" option will add a new expense to the database file specified by the user. If the database does not already exist, a new one will be started.
 
     python run.py add .99 "Chewing gum" --dt=13-09-1877
-This command with the "--dt" option will add a new expense to the database file with the date specified by the user (default is today's date).
+This command with the "--dt" option will add a new expense to the database file with the date specified by the user (default is today's date).  User can pass any separators to date, this program will change them to "/".
 
 ### "report" command:
     python run.py report
 This command displays the database file as an expense table.
 
-    python run.py report --db-filepath="custom_dir/custom_file.db"
+    python run.py report --db-filepath=custom_dir/custom_file.db
 This command displays the database file specified by user.
 
     python run.py report --sort=date
@@ -83,3 +83,14 @@ This command sorts expenses by value.
 This command changes the order of expenses to descending order, by default they are in ascending order.
 
 ### "import-from" command:
+    python run.py import-from dir/file.csv
+This command imports the values ​​and description of expenses into a database file, generates new ID numbers and date(today's date).
+
+    python run.py import-from dir/file.csv --db-filepath=custom_dir/custom_file.db
+This command imports expenses to database file specified by user.
+
+    python run.py import-from dir/file.csv --dt=13-05-2005
+This command imports expenses and adds the user's date to them. User can pass any separators to date, this program will change them to "/".
+
+### "export-to" command:
+    
