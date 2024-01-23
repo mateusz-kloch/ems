@@ -370,7 +370,7 @@ def report(db_filepath: str, sort: str|None, descending: bool, python: bool) -> 
         
     Usage examples:
         python run.py report
-        python run.py
+        python run.py report --db-filepath=dir/database.db
         python run.py report --sort=date
         python run.py report --sort=value --descending
         python run.py report --python
