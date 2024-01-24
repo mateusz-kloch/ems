@@ -34,8 +34,8 @@ This is my extension of the project from module 7 completed during the Praktyczn
     - dateutil 2.8.2
     - pytest 7.4.4
 
-#### All necessary tools are pre-installed in the virtual environment.
-#### Compatibility with previous versions not tested.
+##### All necessary tools are pre-installed in the virtual environment.
+##### Compatibility with previous versions not tested.
 
 ## Repository layout:
 ```
@@ -66,6 +66,8 @@ This command with the "--db-filepath" option will add a new expense to the datab
     python run.py add .99 "Chewing gum" --dt=13-09-1877
 This command with the "--dt" option will add a new expense to the database file with the date specified by the user (default is today's date).  User can pass any separators to date, this program will change them to "/".
 
+---
+
 ### "report" command:
     python run.py report
 This command displays the database file as an expense table.
@@ -82,6 +84,8 @@ This command sorts expenses by value.
     python run.py report --descending
 This command changes the order of expenses to descending order, by default they are in ascending order.
 
+---
+
 ### "import-from" command:
     python run.py import-from dir/file.csv
 This command imports the values ​​and description of expenses into a database file, generates new ID numbers and date(today's date).
@@ -91,6 +95,8 @@ This command imports expenses to database file specified by user.
 
     python run.py import-from dir/file.csv --dt=13-05-2005
 This command imports expenses and adds the user's date to them. User can pass any separators to date, this program will change them to "/".
+
+---
 
 ### "export-to" command:
     python run.py export-to dir/file.csv
