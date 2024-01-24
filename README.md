@@ -8,7 +8,7 @@ This is my extension of the project from module 7 completed during the Praktyczn
 
 ### The expense consists of:
 - identification number - assigned by the program when creating an expense
-- date - format: "dd/mm/yyyy", by default program uses today's date but it is possibility to add own (see: [Usage](/ems_project#usage).
+- date - format: "dd/mm/yyyy", by default program uses today's date but it is possibility to add own (see: [Usage](#usage).
 - value
 - description
 
