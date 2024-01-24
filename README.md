@@ -1,13 +1,13 @@
 # EMS (EXPENSE MANAGEMENT SYSTEM)
 
-### This program was created to enable users to control and manage their budget. The user can create his own database, manually add expenses to it or import them from CSV files and extract the database in the form of expense reports to external CSV files.
+### This program was created to enable users to control and manage their budget. The user can create his own database, manually add expenses to it or import them from CSV files and extract the database in the form of expense report to external CSV files.
 
 Management is done via text mode in the terminal, and uses click library to divide program into subcommands ("add", "report", "import-from", "export-to").
 
 This is my extension of the project from module 7 completed during the Praktyczny Python course.
 
 ### The expense consists of:
-- identification number - number that is assigned by the program when creating an expense
+- identification number - assigned by the program when creating an expense
 - date - format: "dd/mm/yyyy", by default program uses today's date but it is possibility to add own (see: Usage).
 - value
 - description
@@ -93,4 +93,8 @@ This command imports expenses to database file specified by user.
 This command imports expenses and adds the user's date to them. User can pass any separators to date, this program will change them to "/".
 
 ### "export-to" command:
-    
+    python run.py export-to dir/file.csv
+This command exports expenses to external CSV file.
+
+    python run.py export-to dir/dir/file.csv --db-filepath=dir/database.db
+This command exports expenses from database file specified by user.
