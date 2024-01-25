@@ -13,6 +13,7 @@ This is my extension of the project from module 7 completed during the Praktyczn
 - description
 
 ### In the future will be added:
+- Tracking changes
 - Possibility to edit existing expenses
 - Possibility of assigning a given currency to the database and converting values according to current exchange rates
 - Support for more external file types
