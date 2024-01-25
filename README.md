@@ -14,8 +14,7 @@ This is my extension of the project from module 7 completed during the Praktyczn
 
 ### In the future will be added:
 - Tracking changes
-- Editing expenses
-- Removing expenses
+- Editing and removing existing expenses
 - Assigning a given currency to the database and converting values according to current exchange rates
 - Support for more external file types
 
