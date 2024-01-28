@@ -5,15 +5,17 @@ This script allows users to manage their expenses by:
     - import expenses from csv file (the list of supported files will be expanded in the future)
     - export database to csv file (same as above)
     - view database as table
+    - edit exisisting expenses
 
 Database is represented by binary file with .db extension.
 
-Expenses are represented by the "UserExpense" class, which consists of an id number, date, value and a short description.
+Expenses are represented by the "UserExpense" class, which consists of an id number, date, amount and a short description.
 
 Management is done via text mode in the terminal, and uses click library to divide program into subcommands.
     Available subcommands:
     - add
     - report
+    - edit
     - import-from
     - export-to
 
@@ -31,16 +33,20 @@ import click
 from dateutil import parser
 
 
+BIG_EXPENSE_THRESHOLD = 500
 DEFAULT_DB_FILEPATH = 'data/budget.db'
 DT_FORMAT = '%d/%m/%Y'
-BIG_EXPENSE_THRESHOLD = 500
 HELP_ADD = 'Add new expense to datebase.'
 HELP_OPTION_DB_FILEPATH = 'Enter path to database file, default: budget.db'
 HELP_OPTION_DT = 'Enter your date, it is recommended to enter day first. If not specified, uses today\'s date.'
 HELP_REPORT = 'Viem expenses database as table.'
-HELP_OPTION_SORT = 'View expenses sorted by "date" or "value", by default they are sorted by id numbers.'
-HELP_OPTION_DESCENDING = 'View expenses in descending order, default: ascending.'
-HELP_OPTION_PYTHON = 'View expenses as python code representation.'
+HELP_REPORT_OPTION_SORT = 'View expenses sorted by "date" or "amount", by default they are sorted by id numbers.'
+HELP_REPORT_OPTION_DESCENDING = 'View expenses in descending order, default: ascending.'
+HELP_REPORT_OPTION_PYTHON = 'View expenses as python code representation.'
+HELP_EDIT = 'Edit existing expense.'
+HELP_EDIT_OPTION_DT ='Change date of expense.'
+HELP_EDIT_OPTION_AMOUNT = 'Change amount of expense.'
+HELP_EDIT_OPTION_DESC = 'Change description of expense.'
 HELP_IMPORT_FROM = 'Import data from file, supported file formats: (csv).'
 HELP_EXPORT_TO = 'Export data to file, supported file formats: (csv).'
 
@@ -49,21 +55,21 @@ HELP_EXPORT_TO = 'Export data to file, supported file formats: (csv).'
 class UserExpense:
     id_num: int
     dt : str
-    value: float
+    amount: float
     desc: str
 
 
     def __post_init__(self) -> ValueError:
-        if self.value == 0:
-            raise ValueError('The expense cannot be equal to zero.')
-        if self.value < 0:
-            raise ValueError('The expense cannot be negative.')
+        if self.amount == 0:
+            raise ValueError('The expense amount cannot be zero.')
+        if self.amount < 0:
+            raise ValueError('The expense amount cannot be negative.')
         if not self.desc or self.desc.isspace():
-            raise ValueError('Missing name for new expense.')
+            raise ValueError('Missing description for the expense.')
     
 
     def is_big(self) -> bool:
-        return self.value >= BIG_EXPENSE_THRESHOLD
+        return self.amount >= BIG_EXPENSE_THRESHOLD
 
 
 def read_db(db_filepath: str) -> list[UserExpense]:
@@ -109,7 +115,7 @@ def generate_date(dt: str|None) -> str:
     Returns:
         str: Date adjusted to the database format.
     """
-    if dt:
+    if dt or dt == '':
         dt = parser.parse(dt, dayfirst=True)
     else:
         dt = date.today()
@@ -117,14 +123,14 @@ def generate_date(dt: str|None) -> str:
     return dt
 
 
-def create_expense(id_num: int, dt: str, value: float, desc: str) -> UserExpense:
+def create_expense(id_num: int, dt: str, amount: float, desc: str) -> UserExpense:
     """
     Collects information about the expense and creates an object of the UserExpense class.
 
     Args:
         id_num (int): Unique id number.
         dt (str): Standardized date.
-        value (float): Value of the expense.
+        amount (float): amount of the expense.
         desc (str): Short description.
 
     Return:
@@ -133,7 +139,7 @@ def create_expense(id_num: int, dt: str, value: float, desc: str) -> UserExpense
     new_expense = UserExpense(
         id_num = id_num,
         dt = dt,
-        value = value,
+        amount = amount,
         desc = desc
         )
     return new_expense
@@ -183,27 +189,61 @@ def sort_expenses(expenses: list[UserExpense], sort: str|None, descending: bool)
     """
     if sort == 'date':
         sorted_expenses = sorted(expenses, key=lambda x: x.dt.split('/')[::-1], reverse=descending)
-    elif sort == 'value':
-        sorted_expenses = sorted(expenses, key=lambda x: x.value, reverse=descending)
+    elif sort == 'amount':
+        sorted_expenses = sorted(expenses, key=lambda x: x.amount, reverse=descending)
     else:
         sorted_expenses = sorted(expenses, key=lambda x: x.id_num, reverse=descending)
     return sorted_expenses
 
 
-def calculate_total_value_of_expenses(expenses: list[UserExpense]) -> float:
+def calculate_total_expenses_amount(expenses: list[UserExpense]) -> float:
     """
-    Calculates the total value of expenses.
+    Calculates the total amount of expenses.
 
     Args:
-        expenses (list[UserExpense]): List of expenses for which the total value will be calculated.
+        expenses (list[UserExpense]): List of expenses for which the total amount will be calculated.
     
     returns:
-        float: Total value of expenses.
+        float: Total amount of expenses.
     """
     total = 0
     for expense in expenses:
-        total += expense.value
+        total += expense.amount
     return total
+
+
+def edit_expense(expenses: list[UserExpense], id_num: int, dt: str|None, amount: float|None, desc: str|None) -> list[UserExpense]:
+    """
+    Edits expense of id number specified by user.
+
+    Args:
+        expenses (list[UserExpense]): The list of expenses that will be modified.
+        id_num (int): The identification number of the expense that will be modified.
+        dt (str|None): New expense date, if defined.
+        amount (float|None): New expense amount, if defined.
+        desc (str): New expense description, if defined.
+
+    Returns:
+        list[UserExpense]: Modified expense list.
+    """
+    ids = {expense.id_num for expense in expenses}
+    if id_num not in ids:
+        raise ValueError(f'ID {id_num}# not exists in database.')
+    if amount != None and amount == 0:
+        raise ValueError('The expense amount cannot be zero.')
+    if amount != None and amount < 0:
+        raise ValueError('The expense amount cannot be negative.')
+    if desc != None and len(desc) < 1 or desc != None and desc.isspace():
+        raise ValueError('Missing description for the expense.')
+    for expense in expenses:
+        if expense.id_num == id_num:
+            if dt:
+                expense.dt = dt
+            if amount:
+                expense.amount = amount
+            if desc:
+                expense.desc = desc
+    return expenses
 
 
 def specify_filetype(filepath: str) -> str:
@@ -226,18 +266,18 @@ def specify_filetype(filepath: str) -> str:
 
 def import_csv(csv_filepath: str) -> list[dict]:
     """
-    Reads the content of a csv file and extracts the value and description of the expense.
+    Reads the content of a csv file and extracts the amount and description of the expense.
     If the file content is empty, it throws "ValueError"
 
     Args:
         csv_filepath (str): Path to the csv file from which expenses will be imported.
 
     Returns:
-        list[dict]: A list of rows from the csv file content in the form of dictionaries containing values for "value" and "desc".
+        list[dict]: A list of rows from the csv file content in the form of dictionaries containing amounts for "amount" and "desc".
     """
     with open(csv_filepath, encoding='utf-8') as stream:
         reader = DictReader(stream)
-        csv_expenses = [{'value': float(row['value']), 'desc': row['desc']} for row in reader]
+        csv_expenses = [{'amount': float(row['amount']), 'desc': row['desc']} for row in reader]
     if csv_expenses == []:
         raise ValueError('Missing file content.')
     return csv_expenses
@@ -253,7 +293,7 @@ def export_csv(csv_filepath: str, expenses: list[UserExpense]) -> None:
     Returns:
         None
     """
-    headers = ['id_num', 'dt', 'value', 'desc']
+    headers = ['id_num', 'dt', 'amount', 'desc']
     with open(csv_filepath, 'x', encoding='utf-8') as stream:
         writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
@@ -262,7 +302,7 @@ def export_csv(csv_filepath: str, expenses: list[UserExpense]) -> None:
                 {
                     'id_num': expense.id_num,
                     'dt': expense.dt,
-                    'value': expense.value,
+                    'amount': expense.amount,
                     'desc' : expense.desc
                 }
             )
@@ -293,17 +333,17 @@ def cli():
 
 
 @cli.command(help=HELP_ADD)
-@click.argument('value', type=float)
+@click.argument('amount', type=float)
 @click.argument('description')
 @click.option('--db-filepath', default=DEFAULT_DB_FILEPATH, help=HELP_OPTION_DB_FILEPATH)
 @click.option('--dt', help=HELP_OPTION_DT)
-def add(value: float, description: str, db_filepath: str, dt: str|None) -> None:
+def add(amount: float, description: str, db_filepath: str, dt: str|None) -> None:
     """
     Adds an expense to the database if it exists or creates a new one.
     It is possible to add one expenses at a time.
 
     Args:
-        value (float): The value of the expense that will be added.
+        amount (float): The amount of the expense that will be added.
         description (str): Short description of expense.
     
     Options: (can be used in any configuration)
@@ -314,11 +354,11 @@ def add(value: float, description: str, db_filepath: str, dt: str|None) -> None:
         None
         
     Usage examples:
-        python run.py add 149.99 "Telephon installment"
-        python run.py add 50 "Small shopping" --db-filepath=dir/dir/file.db
-        python run.py add .99 "Chewing gum" --dt=13-09-1877
-        python run.py add 230 "Shopping" --dt=5.4.1967
-        python run.py add 25 "Electricity bill" --dt="12 06 2015" 
+        python src/run.py add 149.99 "Telephon installment"
+        python src/run.py add 50 "Small shopping" --db-filepath=dir/dir/file.db
+        python src/run.py add .99 "Chewing gum" --dt=13-09-1877
+        python src/run.py add 230 "Shopping" --dt=5.4.1967
+        python src/run.py add 25 "Electricity bill" --dt="12 06 2015" 
     """
     try:
         expenses = read_db(db_filepath)
@@ -328,15 +368,15 @@ def add(value: float, description: str, db_filepath: str, dt: str|None) -> None:
     try:
         dt = generate_date(dt)
     except ValueError:
-            print('Invalid date format.')
+            print('ERROR: Invalid date format.')
             sys.exit(1)
     
     id_num = generate_new_id_num(expenses)
 
     try:
-        new_expense = create_expense(id_num, dt, value, description)
+        new_expense = create_expense(id_num, dt, amount, description)
     except ValueError as exception:
-        print(f'Error: {exception.args[0]}')
+        print(f'ERROR: {exception.args[0]}')
         sys.exit(2)
     
     updated_expenses = add_new_expense(expenses, new_expense)
@@ -345,23 +385,23 @@ def add(value: float, description: str, db_filepath: str, dt: str|None) -> None:
         write_db(db_filepath, updated_expenses)
         print(f'Saved to: {db_filepath}.')
     except FileNotFoundError:
-        print(f'There is no such path: {db_filepath}.')
+        print(f'ERROR: There is no such path: {db_filepath}.')
         sys.exit(3)
 
 
 @cli.command(help=HELP_REPORT)
 @click.option('--db-filepath', default=DEFAULT_DB_FILEPATH, help=HELP_OPTION_DB_FILEPATH)
-@click.option('--sort', type=click.Choice(['date', 'value']), help=HELP_OPTION_SORT)
-@click.option('--descending', is_flag=True, default=False, help=HELP_OPTION_DESCENDING)
-@click.option('--python', is_flag=True, default=False, help=HELP_OPTION_PYTHON)
+@click.option('--sort', type=click.Choice(['date', 'amount']), help=HELP_REPORT_OPTION_SORT)
+@click.option('--descending', is_flag=True, default=False, help=HELP_REPORT_OPTION_DESCENDING)
+@click.option('--python', is_flag=True, default=False, help=HELP_REPORT_OPTION_PYTHON)
 def report(db_filepath: str, sort: str|None, descending: bool, python: bool) -> None:
     """
     Shows expenses database as table.
-    If value is equal to or greater than 500 then expense will be marked by "[!]" sign.
+    If the expense amount exceeds a certain threshold, the expense will be marked with a "[!]" sign.
     
     Options: (can be used in any configuration)
         --db-filepath (str): The path to custom database.
-        --sort (str|None): Specifies expenses sorting method, select: "date" or "value". By default they are sorted by id numbers.
+        --sort (str|None): Specifies expenses sorting method, select: "date" or "amount". By default they are sorted by id numbers.
         --descending (bool): Changes order of expenses. Default order is ascending.
         --python (bool): Displays python code representations instead of expense table.
     
@@ -369,16 +409,16 @@ def report(db_filepath: str, sort: str|None, descending: bool, python: bool) -> 
         None
         
     Usage examples:
-        python run.py report
-        python run.py report --db-filepath=dir/database.db
-        python run.py report --sort=date
-        python run.py report --sort=value --descending
-        python run.py report --python
+        python src/run.py report
+        python src/run.py report --db-filepath=dir/database.db
+        python src/run.py report --sort=date
+        python src/run.py report --sort=amount --descending
+        python src/run.py report --python
     """
     try:
         expenses = read_db(db_filepath)
     except (EOFError, FileNotFoundError):
-        print('No data has been entered yet.')
+        print('ERROR: No data has been entered yet.')
         sys.exit(4)
     
     sorted_expenses = sort_expenses(expenses, sort, descending)
@@ -386,17 +426,75 @@ def report(db_filepath: str, sort: str|None, descending: bool, python: bool) -> 
     if python:
         print(repr(expenses))
     else:
-        total = calculate_total_value_of_expenses(expenses)
-        print('~~ID~~ ~~~DATE~~~ ~~VALUE~~ ~~BIG~~ ~~~DESCRIPTION~~~')
-        print('~~~~~~ ~~~~~~~~~~ ~~~~~~~~~ ~~~~~~~ ~~~~~~~~~~~~~~~~~')
+        total = calculate_total_expenses_amount(expenses)
+        print('~~ID~~ ~~~DATE~~~ ~~AMOUNT~~ ~~BIG~~ ~~~DESCRIPTION~~~')
+        print('~~~~~~ ~~~~~~~~~~ ~~~~~~~~~~ ~~~~~~~ ~~~~~~~~~~~~~~~~~')
         for expense in sorted_expenses:
             if expense.is_big():
                 big = '[!]'
             else:
                 big = ''
-            print(f'{expense.id_num:5}# {expense.dt:10} {expense.value:9.2f} {big:^7} {expense.desc}')
+            print(f'{expense.id_num:5}# {expense.dt:10} {expense.amount:10.2f} {big:^7} {expense.desc}')
         print('~~~~~~~~~~~~~~~~~')
         print(f'Total: {total:10.2f}')
+
+
+@cli.command(help=HELP_EDIT)
+@click.argument('id-num', type=int)
+@click.option('--db-filepath', default=DEFAULT_DB_FILEPATH, help=HELP_OPTION_DB_FILEPATH)
+@click.option('--dt', help=HELP_EDIT_OPTION_DT)
+@click.option('--amount', type=float, help=HELP_EDIT_OPTION_AMOUNT)
+@click.option('--desc', help=HELP_EDIT_OPTION_DESC)
+def edit(id_num: int, db_filepath: str, dt: str|None, amount: float|None, desc: str|None) -> None:
+    """
+    Edits components of expense in database.
+    The expense to be edited is identified by an id number.
+    If no option is specified or it is empty, no changes will be made.
+
+    Args:
+        id-num (int): The identification number of the expense that will be edited.
+
+    Options: (can be used in any configuration)
+        --db-filepath (str): The path to custom database.
+        --dt (str): Specifies new dt for the expense.
+        --amount (float): Specifies new amount for the expense.
+        --desc (str): Specifies new description for the expense.
+
+    Returns:
+        None
+
+    Usage examples:
+        python src/run.py edit 13 --db-filepath=dir/file.db --amount=130
+        python src/run.py edit 24 --dt=12-03-1997
+        python src/run.py edit 5 --amount=1500
+        python src/run.py edit 190 --desc="Utility fee"
+        python src/run.py edit 26 --dt=5.12.2000 --amount=500 --desc="Some shopping"
+    """
+    if not dt and not amount and not desc:
+        print('ERROR: No values have been passed.')
+        sys.exit(5)
+    
+    if dt:
+        try:
+            dt = generate_date(dt)
+        except ValueError:
+                print('ERROR: Invalid date format.')
+                sys.exit(6)
+    
+    try:
+        expenses = read_db(db_filepath)
+    except (EOFError, FileNotFoundError):
+        print('ERROR: No data has been entered yet, nothing to edit.')
+        sys.exit(7)
+    
+    try:
+        updated_expenses = edit_expense(expenses, id_num, dt, amount, desc)
+    except ValueError as exception:
+        print(f'ERROR: {exception.args[0]}')
+        sys.exit(8)
+
+    write_db(db_filepath, updated_expenses)
+    print(f'Saved to: {db_filepath}.')
 
 
 @cli.command(help=HELP_IMPORT_FROM)
@@ -420,17 +518,17 @@ def import_from(import_path: str, db_filepath: str, dt: str|None) -> None:
         None
         
     Usage examples:
-        python run.py import-from dir/file.csv
-        python run.py import-from "some dir/file.csv" --db-filepath=dir/database.db
-        python run.py import-from dir/dir/file.csv --dt=13-05-2005
+        python src/run.py import-from dir/file.csv
+        python src/run.py import-from "some dir/file.csv" --db-filepath=dir/database.db
+        python src/run.py import-from dir/dir/file.csv --dt=13-05-2005
     
     Path to a sample csv file with expenses: data/example_expenses.csv
     """
     try:
         file_type = specify_filetype(import_path)
     except TypeError as exception:
-        print(f'Error: {exception.args[0]}')
-        sys.exit(5)
+        print(f'ERROR: {exception.args[0]}')
+        sys.exit(9)
 
     try:
         expenses = read_db(db_filepath)
@@ -441,30 +539,30 @@ def import_from(import_path: str, db_filepath: str, dt: str|None) -> None:
         try:
             file_content = import_csv(import_path)
         except FileNotFoundError:
-            print('File not exist.')
-            sys.exit(6)
+            print('ERROR: File not exist.')
+            sys.exit(10)
         except ValueError as exception:
-            print(f'Error: {exception.args[0]}')
-            sys.exit(7)
+            print(f'ERROR: {exception.args[0]}')
+            sys.exit(11)
         except KeyError:
-            print(f'Invalid headers in {import_path}.')
-            sys.exit(8)
+            print(f'ERROR: Invalid headers in {import_path}.')
+            sys.exit(12)
     
     try:
         dt = generate_date(dt)
     except ValueError:
-            print('Invalid date format.')
-            sys.exit(9)
+            print('ERROR: Invalid date format.')
+            sys.exit(13)
 
     for expense in file_content:
         
         id_num = generate_new_id_num(expenses)
-        value, desc = expense.values()
+        amount, desc = expense.values()
         try:
-            new_expense = create_expense(id_num, dt, value, desc)
+            new_expense = create_expense(id_num, dt, amount, desc)
         except ValueError as exception:
-            print(f'Error: {exception.args[0]}')
-            sys.exit(10)
+            print(f'ERROR: {exception.args[0]}')
+            sys.exit(14)
         
         updated_expenses = add_new_expense(expenses, new_expense)
     
@@ -472,8 +570,8 @@ def import_from(import_path: str, db_filepath: str, dt: str|None) -> None:
         write_db(db_filepath, updated_expenses)
         print(f'Saved to: {db_filepath}.')
     except FileNotFoundError:
-        print(f'There is no such path: {db_filepath}.')
-        sys.exit(11)
+        print(f'ERROR: There is no such path: {db_filepath}.')
+        sys.exit(15)
 
 
 @cli.command(help=HELP_EXPORT_TO)
@@ -495,20 +593,20 @@ def export_to(export_path: str, db_filepath: str) -> None:
         None
         
     Usage examples:
-        python run.py export-to dir/file.csv
-        python run.py export-to dir/dir/file.csv --db-filepath=dir/database.db
+        python src/run.py export-to dir/file.csv
+        python src/run.py export-to dir/dir/file.csv --db-filepath=dir/database.db
     """
     try:
         file_type = specify_filetype(export_path)
     except TypeError as exception:
-        print(f'Error: {exception.args[0]}')
-        sys.exit(12)
+        print(f'ERROR: {exception.args[0]}')
+        sys.exit(16)
     
     try:
         expenses = read_db(db_filepath)
     except (EOFError, FileNotFoundError):
-        print('No data has been entered yet, nothing to write.')
-        sys.exit(13)
+        print('ERROR: No data has been entered yet, nothing to write.')
+        sys.exit(17)
     
     if file_type == 'csv':
         try:
@@ -525,8 +623,8 @@ def export_to(export_path: str, db_filepath: str) -> None:
                 except FileExistsError:
                     occurrency += 1
         except FileNotFoundError:
-            print(f'There is no such path: {export_path}.')
-            sys.exit(14)
+            print(f'ERROR: There is no such path: {export_path}.')
+            sys.exit(18)
 
 
 if __name__ == '__main__':
