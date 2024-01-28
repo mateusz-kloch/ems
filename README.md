@@ -117,7 +117,7 @@ This command edits all values of the expense.
 Requires a path to an external expense file that will be imported into the database. Optionally, you can enter a path to a custom database file and a date, otherwise the default path and today's date will be used.
     
     python run.py import-from dir/file.csv
-This command imports the amounts ​​and descriptions of expenses into a database file, generates new ID numbers and date(today's date).
+This command imports the amounts and descriptions of expenses into a database file, generates new ID numbers and date(today's date).
 
     python run.py import-from dir/file.csv --db-filepath=custom_dir/custom_file.db
 This command imports expenses to database file specified by user.
