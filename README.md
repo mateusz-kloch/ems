@@ -7,7 +7,7 @@ Management is done via text mode in the terminal, and uses click library to divi
 This is my extension of the project from module 7 completed during the Praktyczny Python course.
 
 ### The expense consists of:
-- identification number - assigned by the program when creating an expense
+- ID - assigned by the program when creating an expense
 - date - format: "dd/mm/yyyy", by default program uses today's date but it is possibility to add own (see: [Usage](#usage)).
 - amount
 - description
@@ -55,7 +55,7 @@ This is my extension of the project from module 7 completed during the Praktyczn
 └── requirements.txt
 ```
 ## Usage:
-Tip: All options of each command can be used in any configuration.
+:bulb: **Tip:** All options of each command can be used in any configuration.
 
 ### "add" command:
 Requires entering the amount and description of the expense. Optionally, you can enter a path to a custom database file and a date, otherwise the default path and today's date will be used.
@@ -81,7 +81,7 @@ This command displays the database file as an expense table.
 This command displays the database file specified by user.
 
     python run.py report --sort=date
-This command sorts expenses by date, by default they are sorted by identification numbers.
+This command sorts expenses by date, by default they are sorted by ID's.
 
     python run.py report --sort=amount
 This command sorts expenses by amount.
@@ -92,9 +92,9 @@ This command changes the order of expenses to descending order, by default they 
 ---
 
 ### "edit" command:
-Requires the ID number of the expense to be edited and at least one of the options ("--dt", "--amount", "--desc"), otherwise an error will be reported.
+Requires the ID of the expense to be edited and at least one of the options ("--dt", "--amount", "--desc"), otherwise an error will be reported.
 
-Tip: ID's cannot be edited.
+:warning: **Warning:** ID's cannot be edited.
 
     python src/run.py edit 13 --db-filepath=dir/file.db --amount=130
 This command edits the expense amount in the database file specified by the user.
@@ -114,7 +114,7 @@ This command edits all values of the expense.
 ---
 
 ### "import-from" command:
-Requires a path to an external expense file that will be imported into the database. Optionally, you can enter a path to a custom database file and a date, otherwise the default path and today's date will be used.
+Requires a path to an external expense file that will be imported into the database. It only imports amounts and descriptions, a new ID and date will be assigned. Optionally, you can enter a path to a custom database file and a date, otherwise the default path and today's date will be used.
     
     python run.py import-from dir/file.csv
 This command imports the amounts and descriptions of expenses into a database file, generates new ID numbers and date(today's date).
