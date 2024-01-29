@@ -34,7 +34,7 @@ This is my extension of the project from module 7 completed during the Praktyczn
     - dateutil 2.8.2
     - pytest 7.4.4
 
-:bulb: **Tip:** All necessary tools are pre-installed in the virtual environment.
+:note: **Note:** All necessary tools are pre-installed in the virtual environment.
 
 :warning: **Warning:** Compatibility with previous versions not tested.
 
