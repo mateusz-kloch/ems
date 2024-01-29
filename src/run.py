@@ -9,7 +9,7 @@ This script allows users to manage their expenses by:
 
 Database is represented by binary file with .db extension.
 
-Expenses are represented by the "UserExpense" class, which consists of an id number, date, amount and a short description.
+Expenses are represented by the "UserExpense" class, which consists of an ID, date, amount and a short description.
 
 Management is done via text mode in the terminal, and uses click library to divide program into subcommands.
     Available subcommands:
@@ -36,6 +36,7 @@ from dateutil import parser
 BIG_EXPENSE_THRESHOLD = 500
 DEFAULT_DB_FILEPATH = 'data/budget.db'
 DT_FORMAT = '%d/%m/%Y'
+
 HELP_ADD = 'Add new expense to datebase.'
 HELP_OPTION_DB_FILEPATH = 'Enter path to database file, default: budget.db'
 HELP_OPTION_DT = 'Enter your date, it is recommended to enter day first. If not specified, uses today\'s date.'
@@ -43,7 +44,7 @@ HELP_REPORT = 'Viem expenses database as table.'
 HELP_REPORT_OPTION_SORT = 'View expenses sorted by "date" or "amount", by default they are sorted by id numbers.'
 HELP_REPORT_OPTION_DESCENDING = 'View expenses in descending order, default: ascending.'
 HELP_REPORT_OPTION_PYTHON = 'View expenses as python code representation.'
-HELP_EDIT = 'Edit existing expense.'
+HELP_EDIT = 'Edit existing expense. Requies to pass at least one of: --dt, --amount, --desc.'
 HELP_EDIT_OPTION_DT ='Change date of expense.'
 HELP_EDIT_OPTION_AMOUNT = 'Change amount of expense.'
 HELP_EDIT_OPTION_DESC = 'Change description of expense.'
@@ -337,17 +338,17 @@ def cli():
 
 @cli.command(help=HELP_ADD)
 @click.argument('amount', type=float)
-@click.argument('description')
+@click.argument('desc')
 @click.option('--db-filepath', default=DEFAULT_DB_FILEPATH, help=HELP_OPTION_DB_FILEPATH)
 @click.option('--dt', help=HELP_OPTION_DT)
-def add(amount: float, description: str, db_filepath: str, dt: str|None) -> None:
+def add(amount: float, desc: str, db_filepath: str, dt: str|None) -> None:
     """
     Adds an expense to the database if it exists or creates a new one.
     It is possible to add one expenses at a time.
 
     Args:
         amount (float): The amount of the expense that will be added.
-        description (str): Short description of expense.
+        desc (str): Short description of expense.
     
     Options: (can be used in any configuration)
         --db-filepath (str): The path to custom database.
@@ -380,7 +381,7 @@ def add(amount: float, description: str, db_filepath: str, dt: str|None) -> None
     id_num = generate_new_id_num(expenses)
 
     try:
-        new_expense = create_expense(id_num, dt, amount, description)
+        new_expense = create_expense(id_num, dt, amount, desc)
     except ValueError as exception:
         print(f'ERROR: {exception.args[0]}')
         sys.exit(3)
@@ -461,7 +462,7 @@ def edit(id_num: int, db_filepath: str, dt: str|None, amount: float|None, desc: 
     """
     Edits components of expense in database.
     The expense to be edited is identified by an id number.
-    If no option is specified or it is empty, no changes will be made.
+    If no option is specified (--dt, --amount, --desc) or it is empty, no changes will be made.
 
     Args:
         id-num (int): The identification number of the expense that will be edited.
@@ -511,8 +512,12 @@ def edit(id_num: int, db_filepath: str, dt: str|None, amount: float|None, desc: 
         print(f'ERROR: {exception.args[0]}')
         sys.exit(13)
 
-    write_db(db_filepath, updated_expenses)
-    print(f'Saved to: {db_filepath}.')
+    try:
+        write_db(db_filepath, updated_expenses)
+        print(f'Saved to: {db_filepath}.')
+    except FileNotFoundError:
+        print(f'ERROR: There is no such path: {db_filepath}.')
+        sys.exit(14)
 
 
 @cli.command(help=HELP_IMPORT_FROM)
@@ -546,13 +551,13 @@ def import_from(import_path: str, db_filepath: str, dt: str|None) -> None:
         file_type = specify_filetype(import_path)
     except TypeError as exception:
         print(f'ERROR: {exception.args[0]}')
-        sys.exit(14)
+        sys.exit(15)
 
     try:
         expenses = read_db(db_filepath)
     except TypeError as exception:
         print(f'ERROR: {exception.args[0]}')
-        sys.exit(15)
+        sys.exit(16)
     except (EOFError, FileNotFoundError):
         expenses = []
     
@@ -561,19 +566,19 @@ def import_from(import_path: str, db_filepath: str, dt: str|None) -> None:
             file_content = import_csv(import_path)
         except FileNotFoundError:
             print('ERROR: File not exist.')
-            sys.exit(16)
+            sys.exit(17)
         except ValueError as exception:
             print(f'ERROR: {exception.args[0]}')
-            sys.exit(17)
+            sys.exit(18)
         except KeyError:
             print(f'ERROR: Invalid headers in {import_path}.')
-            sys.exit(18)
+            sys.exit(19)
     
     try:
         dt = generate_date(dt)
     except ValueError:
             print('ERROR: Invalid date format.')
-            sys.exit(19)
+            sys.exit(20)
 
     for expense in file_content:
         
@@ -583,7 +588,7 @@ def import_from(import_path: str, db_filepath: str, dt: str|None) -> None:
             new_expense = create_expense(id_num, dt, amount, desc)
         except ValueError as exception:
             print(f'ERROR: {exception.args[0]}')
-            sys.exit(20)
+            sys.exit(21)
         
         updated_expenses = add_new_expense(expenses, new_expense)
     
@@ -592,7 +597,7 @@ def import_from(import_path: str, db_filepath: str, dt: str|None) -> None:
         print(f'Saved to: {db_filepath}.')
     except FileNotFoundError:
         print(f'ERROR: There is no such path: {db_filepath}.')
-        sys.exit(21)
+        sys.exit(22)
 
 
 @cli.command(help=HELP_EXPORT_TO)
@@ -621,19 +626,19 @@ def export_to(export_path: str, db_filepath: str) -> None:
         file_type = specify_filetype(export_path)
     except TypeError as exception:
         print(f'ERROR: {exception.args[0]}')
-        sys.exit(22)
+        sys.exit(23)
     
     try:
         expenses = read_db(db_filepath)
     except FileNotFoundError:
         print(f'ERROR: There is no such path: {db_filepath}.')
-        sys.exit(23)
+        sys.exit(24)
     except TypeError as exception:
         print(f'ERROR: {exception.args[0]}')
-        sys.exit(24)
+        sys.exit(25)
     except (EOFError, FileNotFoundError):
         print('ERROR: No data has been entered yet, nothing to write.')
-        sys.exit(25)
+        sys.exit(26)
     
     if file_type == 'csv':
         try:
@@ -651,7 +656,7 @@ def export_to(export_path: str, db_filepath: str) -> None:
                     occurrency += 1
         except FileNotFoundError:
             print(f'ERROR: There is no such path: {export_path}.')
-            sys.exit(26)
+            sys.exit(27)
 
 
 if __name__ == '__main__':
