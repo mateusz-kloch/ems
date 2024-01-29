@@ -1866,7 +1866,7 @@ def test_import_from_missing_extension_in_csv_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 14
+    assert result.exit_code == 15
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
@@ -1883,7 +1883,7 @@ def test_import_from_another_missing_extension_in_csv_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 14
+    assert result.exit_code == 15
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
@@ -1900,7 +1900,7 @@ def test_import_from_unsupported_extension_in_csv_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 14
+    assert result.exit_code == 15
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
@@ -1917,7 +1917,7 @@ def test_import_from_missing_extension_in_db_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 15
+    assert result.exit_code == 16
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
@@ -1934,7 +1934,7 @@ def test_import_from_another_missing_extension_in_db_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 15
+    assert result.exit_code == 16
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
@@ -1951,7 +1951,7 @@ def test_import_from_unsupported_extension_in_db_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 15
+    assert result.exit_code == 16
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
@@ -1965,7 +1965,7 @@ def test_import_from_csv_not_exist(tmp_path):
     db_filepath = tmp_path/'file.db'
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 16
+    assert result.exit_code == 17
     assert result.output.strip() == 'ERROR: File not exist.'
 
 
@@ -1983,7 +1983,7 @@ def test_import_from_only_headers_in_csv(tmp_path):
         writer.writeheader()
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 17
+    assert result.exit_code == 18
     assert result.output.strip() == 'ERROR: Missing file content.'
 
 
@@ -1999,7 +1999,7 @@ def test_import_from_empty_csv(tmp_path):
     stream.close()
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 17
+    assert result.exit_code == 18
     assert result.output.strip() == 'ERROR: Missing file content.'
 
 
@@ -2018,7 +2018,7 @@ def test_import_from_invalid_headers_in_csv(tmp_path):
         writer.writerow({'inv_amount': 10, 'inv_desc': 'first expense'})
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 18
+    assert result.exit_code == 19
     assert result.output.strip() == f'ERROR: Invalid headers in {csv_filepath}.'
 
 
@@ -2038,7 +2038,7 @@ def test_import_from_invalid_user_dt(tmp_path):
         writer.writerow({'amount': 10, 'desc': 'first expense'})
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath, '--dt', dt])
-    assert result.exit_code == 19
+    assert result.exit_code == 20
     assert result.output.strip() == 'ERROR: Invalid date format.'
 
 
@@ -2057,7 +2057,7 @@ def test_import_from_0_amount_in_csv(tmp_path):
         writer.writerow({'amount': 0, 'desc': 'first expense'})
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 20
+    assert result.exit_code == 21
     assert result.output.strip() == 'ERROR: The expense amount cannot be zero.'
 
 
@@ -2076,7 +2076,7 @@ def test_import_from_negative_amount_in_csv(tmp_path):
         writer.writerow({'amount': -1, 'desc': 'first expense'})
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 20
+    assert result.exit_code == 21
     assert result.output.strip() == 'ERROR: The expense amount cannot be negative.'
 
 
@@ -2095,7 +2095,7 @@ def test_import_from_no_desc_in_csv(tmp_path):
         writer.writerow({'amount': 10, 'desc': ''})
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 20
+    assert result.exit_code == 21
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
 
@@ -2114,7 +2114,7 @@ def test_import_from_space_desc_in_csv(tmp_path):
         writer.writerow({'amount': 10, 'desc': ' '})
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 20
+    assert result.exit_code == 21
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
 
@@ -2133,7 +2133,7 @@ def test_import_from_tab_desc_in_csv(tmp_path):
         writer.writerow({'amount': 10, 'desc': ' '})
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 20
+    assert result.exit_code == 21
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
 
@@ -2152,7 +2152,7 @@ def test_import_from_newline_desc_in_csv(tmp_path):
         writer.writerow({'amount': 10, 'desc': '\n'})
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 20
+    assert result.exit_code == 21
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
 
@@ -2171,7 +2171,7 @@ def test_import_from_invalid_db_path(tmp_path):
         writer.writerow({'amount': 10, 'desc': 'first expense'})
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 21
+    assert result.exit_code == 22
     assert result.output.strip() == f'ERROR: There is no such path: {db_filepath}.'
 
 
@@ -2273,7 +2273,7 @@ def test_export_to_missing_extension_in_csv_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['export-to', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 22
+    assert result.exit_code == 23
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
@@ -2290,7 +2290,7 @@ def test_export_to_another_missing_extension_in_csv_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['export-to', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 22
+    assert result.exit_code == 23
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
@@ -2307,7 +2307,7 @@ def test_export_to_unsupported_extension_in_csv_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['export-to', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 22
+    assert result.exit_code == 23
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
@@ -2321,7 +2321,7 @@ def test_export_to_db_file_not_exist(tmp_path):
     db_filepath = 'not_exist_file.db'
     runner = CliRunner()
     result = runner.invoke(cli, ['export-to', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 23
+    assert result.exit_code == 24
     assert result.output.strip() == f'ERROR: There is no such path: {db_filepath}.'
 
 
@@ -2338,7 +2338,7 @@ def test_export_to_missing_extension_in_db_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['export-to', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 24
+    assert result.exit_code == 25
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
@@ -2355,7 +2355,7 @@ def test_export_to_another_missing_extension_in_db_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['export-to', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 24
+    assert result.exit_code == 25
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
@@ -2372,7 +2372,7 @@ def test_export_to_unsupported_extension_in_db_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['export-to', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 24
+    assert result.exit_code == 25
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
@@ -2388,7 +2388,7 @@ def test_export_to_empty_db_file(tmp_path):
     db_file.close()
     runner = CliRunner()
     result = runner.invoke(cli, ['export-to', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 25
+    assert result.exit_code == 26
     assert result.output.strip() == 'ERROR: No data has been entered yet, nothing to write.'
 
 
@@ -2405,5 +2405,5 @@ def test_export_to_invalid_csv_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['export-to', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 26
+    assert result.exit_code == 27
     assert result.output.strip() == f'ERROR: There is no such path: {csv_filepath}.'
