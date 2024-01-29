@@ -39,6 +39,7 @@ This is my extension of the project from module 7 completed during the Praktyczn
 :warning: Compatibility with previous versions not tested.
 
 ## Repository layout:
+:memo: src/run.py - A main script of this project.
 ```
 ├── data
 │       ├── budget.db
