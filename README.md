@@ -1,42 +1,42 @@
 # EMS (EXPENSE MANAGEMENT SYSTEM)
 
-### This program was created to enable users to control and manage their budget. The user can create his own database, manually add expenses to it or import them from CSV files, edit expenses in database and extract the database in the form of expense report to external CSV files.
+## This program was created to enable users to control and manage their budget. The user can create his own database, manually add expenses to it or import them from CSV files, edit expenses in database and extract the database in the form of expense report to external CSV files.
 
 Management is done via text mode in the terminal, and uses click library to divide program into subcommands ("add", "report", "edit", "import-from", "export-to").
 
 This is my extension of the project from module 7 completed during the Praktyczny Python course.
 
-### The expense consists of:
+## The expense consists of:
 - ID - assigned by the program when creating an expense
 - date - format: "dd/mm/yyyy", by default program uses today's date but it is possibility to add own (see: [Usage](#usage)).
 - amount
 - description
 
-### In the future will be added:
+## In the future will be added:
 - Removing existing expenses
 - Assigning a given currency to the database and converting values according to current exchange rates
 - Support for more external file types
 
 ## Programming tools:
 
-#### Language:
+### Language:
 - Python 3.11.6
 
-  #### Libraries:
+  ### Libraries:
     - csv
     - dataclasses
     - datetime
     - pickle
     - sys
 
-  #### Third party libraries:
+  ### Third party libraries:
     - click 8.1.7
     - dateutil 2.8.2
     - pytest 7.4.4
 
-:memo: **Note:** All necessary tools are pre-installed in the virtual environment.
+:bulb: All necessary tools are pre-installed in the virtual environment.
 
-:warning: **Warning:** Compatibility with previous versions not tested.
+:warning: Compatibility with previous versions not tested.
 
 ## Repository layout:
 ```
@@ -55,10 +55,10 @@ This is my extension of the project from module 7 completed during the Praktyczn
 └── requirements.txt
 ```
 ## Usage:
-:bulb: **Tip:** All options of each command can be used in any configuration.
+:bulb: All options of each command can be used in any configuration.
 
 ### "add" command:
-Requires entering the amount and description of the expense. Optionally, you can enter a path to a custom database file and a date, otherwise the default path and today's date will be used.
+:memo: Requires entering the amount and description of the expense. Optionally, you can enter a path to a custom database file and a date, otherwise the default path and today's date will be used.
     
     python run.py add 149.99 "Telephon installment"
 This command will add a new epense to the database file (default: "data/budget.db"). If the database does not already exist, a new one will be started.
@@ -72,7 +72,7 @@ This command with the "--dt" option will add a new expense to the database file 
 ---
 
 ### "report" command:
-Optionally, you can enter the path to a custom database, select a sorting method and change the order, or display expenses as Python code.
+:memo: Optionally, you can enter the path to a custom database, select a sorting method and change the order, or display expenses as Python code.
 
     python run.py report
 This command displays the database file as an expense table.
@@ -92,9 +92,9 @@ This command changes the order of expenses to descending order, by default they 
 ---
 
 ### "edit" command:
-Requires the ID of the expense to be edited and at least one of the options ("--dt", "--amount", "--desc"), otherwise an error will be reported.
+:memo: Requires the ID of the expense to be edited and at least one of the options ("--dt", "--amount", "--desc"), otherwise an error will be reported.
 
-:warning: **Warning:** ID's cannot be edited.
+:warning: ID's cannot be edited.
 
     python src/run.py edit 13 --db-filepath=dir/file.db --amount=130
 This command edits the expense amount in the database file specified by the user.
@@ -114,7 +114,7 @@ This command edits all values of the expense.
 ---
 
 ### "import-from" command:
-Requires a path to an external expense file that will be imported into the database. It only imports amounts and descriptions, a new ID and date will be assigned. Optionally, you can enter a path to a custom database file and a date, otherwise the default path and today's date will be used.
+:memo: Requires a path to an external expense file that will be imported into the database. It only imports amounts and descriptions, a new ID and date will be assigned. Optionally, you can enter a path to a custom database file and a date, otherwise the default path and today's date will be used.
     
     python run.py import-from dir/file.csv
 This command imports the amounts and descriptions of expenses into a database file, generates new ID numbers and date(today's date).
@@ -128,7 +128,7 @@ This command imports expenses and adds the user's date to them. User can pass an
 ---
 
 ### "export-to" command:
-Requires the path to the file where the expense file will be exported. Optionally, you can enter a path to a custom database file, otherwise the default path will be used.
+:memo: Requires the path to the file where the expense file will be exported. Optionally, you can enter a path to a custom database file, otherwise the default path will be used.
 
     python run.py export-to dir/file.csv
 This command exports expenses to external CSV file.
