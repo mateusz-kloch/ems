@@ -2,7 +2,7 @@
 
 ## This program was created to enable users to control and manage their budget. The user can create his own database, manually add expenses to it or import them from CSV files, edit expenses in database and extract the database in the form of expense report to external CSV files.
 
-Management is done via text mode in the terminal, and uses click library to divide program into subcommands ("add", "report", "edit", "import-from", "export-to").
+:memo: Management is done via text mode in the terminal, and uses click library to divide program into subcommands ("add", "report", "edit", "import-from", "export-to").
 
 This is my extension of the project from module 7 completed during the Praktyczny Python course.
 
