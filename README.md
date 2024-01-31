@@ -1,6 +1,6 @@
 # EMS (EXPENSE MANAGEMENT SYSTEM)
 
-## This program was created to enable users to control and manage their budget. The user can create his own database, manually add expenses to it or import them from CSV files, edit expenses in database and extract the database in the form of expense report to external CSV files.
+## This program was created with you in mind, so that you can control and manage your budget. You can create your own database, manually add expenses to it or import them from CSV files, edit expenses in the database, and extract the database as an expense report to external CSV file.
 
 :memo: Management is done via text mode in the terminal, and uses click library to divide program into subcommands ("add", "report", "edit", "import-from", "export-to").
 
@@ -56,19 +56,19 @@ This is my extension of the project from module 7 completed during the Praktyczn
 └── requirements.txt
 ```
 ## Usage:
-:bulb: All options of each command can be used in any configuration.
+:bulb: You can use all options of each command in any configuration. There are no conflicts between them.
 
 ### "add" command:
 :memo: Requires entering the amount and description of the expense. Optionally, you can enter a path to a custom database file and a date, otherwise the default path and today's date will be used.
     
     python run.py add 149.99 "Telephon installment"
-This command will add a new epense to the database file (default: "data/budget.db"). If the database does not already exist, a new one will be started.
+This will add a new entry to the database file (default: "data/budget.db"). If the database does not already exist, a new one will be started.
     
     python run.py add 50 "Small shopping" --db-filepath=custom_dir/custom_file.db
-This command with the "--db-filepath" option will add a new expense to the database file specified by the user. If the database does not already exist, a new one will be started.
+This will add a new expense to the user-specified database file. If the database does not already exist, a new one will be started.
 
     python run.py add .99 "Chewing gum" --dt=13-09-1877
-This command with the "--dt" option will add a new expense to the database file with the date specified by the user (default is today's date).  User can pass any separators to date, this program will change them to "/".
+This will add a new expense to the database file with the date you specified (default is today's date). You can pass any existing separators, the program will change them to "/".
 
 ---
 
@@ -76,19 +76,19 @@ This command with the "--dt" option will add a new expense to the database file 
 :memo: Optionally, you can enter the path to a custom database, select a sorting method and change the order, or display expenses as Python code.
 
     python run.py report
-This command displays the database file as an expense table.
+This will display the database file as an expense table.
 
     python run.py report --db-filepath=custom_dir/custom_file.db
-This command displays the database file specified by user.
+This will display the database from the file you specified.
 
     python run.py report --sort=date
-This command sorts expenses by date, by default they are sorted by ID's.
+This will sort expenses by date, by default they are sorted by ID's.
 
     python run.py report --sort=amount
-This command sorts expenses by amount.
+This will sort expenses by amount.
 
     python run.py report --descending
-This command changes the order of expenses to descending order, by default they are in ascending order.
+This will change the order of expenses to descending, by default they are in ascending order.
 
 ---
 
@@ -98,19 +98,19 @@ This command changes the order of expenses to descending order, by default they 
 :warning: ID's cannot be edited.
 
     python src/run.py edit 13 --db-filepath=dir/file.db --amount=130
-This command edits the expense amount in the database file specified by the user.
+This will edit the expense amount in the database file specified by the user.
 
     python src/run.py edit 24 --dt=12-03-1997
-This command edits the expense date.
+This will edit the expense date.
 
     python src/run.py edit 5 --amount=1500
-This command edits the expense amount.
+This will edit the expense amount.
 
     python src/run.py edit 190 --desc="Utility fee"
-This command edits the description of expense.
+This will edit the description of expense.
 
     python src/run.py edit 26 --dt=5.12.2000 --amount=500 --desc="Some shopping"
-This command edits all values of the expense.
+This will edit all expense component values.
 
 ---
 
@@ -118,13 +118,13 @@ This command edits all values of the expense.
 :memo: Requires a path to an external expense file that will be imported into the database. It only imports amounts and descriptions, a new ID and date will be assigned. Optionally, you can enter a path to a custom database file and a date, otherwise the default path and today's date will be used.
     
     python run.py import-from dir/file.csv
-This command imports the amounts and descriptions of expenses into a database file, generates new ID numbers and date(today's date).
+This will import the amounts and descriptions of expenses into a database file, generates new ID numbers and date(today's date).
 
     python run.py import-from dir/file.csv --db-filepath=custom_dir/custom_file.db
-This command imports expenses to database file specified by user.
+This will import expenses to database file specified by user.
 
     python run.py import-from dir/file.csv --dt=13-05-2005
-This command imports expenses and adds the user's date to them. User can pass any separators to date, this program will change them to "/".
+This will import expenses and adds the user's date to them. User can pass any separators to date, this program will change them to "/".
 
 ---
 
@@ -132,7 +132,7 @@ This command imports expenses and adds the user's date to them. User can pass an
 :memo: Requires the path to the file where the expense file will be exported. Optionally, you can enter a path to a custom database file, otherwise the default path will be used.
 
     python run.py export-to dir/file.csv
-This command exports expenses to external CSV file.
+This will export expenses to external CSV file.
 
     python run.py export-to dir/dir/file.csv --db-filepath=dir/database.db
-This command exports expenses from database file specified by user.
+This will export expenses from database file specified by user.
