@@ -1,6 +1,6 @@
 """
 This script first tests the basic functions of run.py, mainly checking the happy path,
-except functions that use the raise statement: [read_db, create_expense, edit_expense, spec_filetype, import_csv].
+except functions that use the raise statement: [read_db, create_expense, validate_args_to_edit, edit_expense, spec_filetype, import_csv].
 To perform the tests, it is necessary to import the "UserExpense" class.
 
 Refers to: 
@@ -12,6 +12,7 @@ Refers to:
     - write_db
     - sort_expenses
     - calculate_total_expenses_amount
+    - validate_args_to_edit,
     - edit_expense,
     - specify_filetype
     - import_csv
@@ -20,6 +21,7 @@ Refers to:
 
 Then will test run.py click commands and exception handling.
 The main command is "cli". Cli only contains a pass statement.
+Since the "cli" command does nothing, it is not tested.
 
 cli subcommands:
     - "add"
@@ -50,6 +52,7 @@ from src.run import (
     write_db,
     sort_expenses,
     calculate_total_expenses_amount,
+    validate_args_to_edit,
     edit_expense,
     specify_filetype,
     import_csv,
@@ -597,6 +600,16 @@ def test_calculate_total_expenses_amount_2_expenses():
     assert got == expect
 
 
+def test_validate_args_to_edit():
+    dt = None
+    amount = None
+    desc = None
+    with pytest.raises(ValueError) as exception:
+        validate_args_to_edit(dt, amount, desc)
+    assert exception.type == ValueError
+    assert str(exception.value) == 'No values have been passed.'
+
+
 def test_edit_expense_dt():
     """
     Test for edit_expense function.
@@ -939,7 +952,7 @@ def test_generate_new_name_occurrency_3():
 
 def test_add_db_exist(tmp_path):
     """
-    Test for "add" command.
+    Test for "add" subcommand.
 
     This test verifies that "add" correctly writes the new expense to the existing expenses in the database file.
     """
@@ -967,7 +980,7 @@ def test_add_db_exist(tmp_path):
 
 def test_add_with_dt_db_exist(tmp_path):
     """
-    Test for "add" command.
+    Test for "add" subcommand.
 
     This test verifies that "add" correctly writes the new expense with the given date to the existing database file.
     """
@@ -995,7 +1008,7 @@ def test_add_with_dt_db_exist(tmp_path):
 
 def test_add_empty_db_file(tmp_path):
     """
-    Test for "add" command.
+    Test for "add" subcommand.
 
     This test verifies that "add" correctly writes the new expense to an existing empty database file.
     """
@@ -1017,7 +1030,7 @@ def test_add_empty_db_file(tmp_path):
 
 def test_add_with_dt_empty_db_file(tmp_path):
     """
-    Test for "add" command.
+    Test for "add" subcommand.
 
     This test verifies that "add" correctly writes the new expense with the given date to an existing empty database file.
     """
@@ -1039,7 +1052,7 @@ def test_add_with_dt_empty_db_file(tmp_path):
 
 def test_add_db_not_exist(tmp_path):
     """
-    Test for "add" command.
+    Test for "add" subcommand.
 
     This test verifies that "add" correctly creates the database file and writes the new expense to it.
     """
@@ -1059,7 +1072,7 @@ def test_add_db_not_exist(tmp_path):
 
 def test_add_with_dt_db_not_exist(tmp_path):
     """
-    Test for "add" command.
+    Test for "add" subcommand.
 
     This test verifies that "add" correctly creates a database file and writes a new expense to it with the given date.
     """
@@ -1079,7 +1092,7 @@ def test_add_with_dt_db_not_exist(tmp_path):
 
 def test_add_db_filepath_missing_extension(tmp_path):
     """
-    Test for "add" command.
+    Test for "add" subcommand.
 
     This test checks whether "add" correctly handles an exception when the database file extension is missing.
     """
@@ -1094,7 +1107,7 @@ def test_add_db_filepath_missing_extension(tmp_path):
 
 def test_add_db_filepath_another_missing_extension(tmp_path):
     """
-    Test for "add" command.
+    Test for "add" subcommand.
 
     This test checks whether "add" correctly handles an exception when the database file extension is missing.
     """
@@ -1109,7 +1122,7 @@ def test_add_db_filepath_another_missing_extension(tmp_path):
 
 def test_add_db_filepath_unsupported_extension(tmp_path):
     """
-    Test for "add" command.
+    Test for "add" subcommand.
 
     This test checks whether "add" correctly handles an exception when the database file extension is not supported.
     """
@@ -1124,7 +1137,7 @@ def test_add_db_filepath_unsupported_extension(tmp_path):
 
 def test_add_invalid_dt(tmp_path):
     """
-    Test for "add" command.
+    Test for "add" subcommand.
 
     This test checks whether "add" correctly handles an exception when an invalid date format is provided.
     """
@@ -1140,7 +1153,7 @@ def test_add_invalid_dt(tmp_path):
 
 def test_add_zero_amount(tmp_path):
     """
-    Test for "add" command.
+    Test for "add" subcommand.
 
     This test checks whether "add" correctly handles an exception when a zero expense amount is provided.
     """
@@ -1150,13 +1163,13 @@ def test_add_zero_amount(tmp_path):
     dt = '13/02/2024'
     runner = CliRunner()
     result = runner.invoke(cli, ['add', amount, desc, '--db-filepath', db_filepath, '--dt', dt])
-    assert result.exit_code == 3
+    assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: The expense amount cannot be zero.'
     
 
 def test_add_negative_amount(tmp_path):
     """
-    Test for "add" command.
+    Test for "add" subcommand.
 
     This test checks whether "add" correctly handles an exception when a negative expense amount is provided.
     """
@@ -1166,13 +1179,13 @@ def test_add_negative_amount(tmp_path):
     dt = '13/02/2024'
     runner = CliRunner()
     result = runner.invoke(cli, ['add', '--db-filepath', db_filepath, '--dt', dt, '--', amount, desc,])
-    assert result.exit_code == 3
+    assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: The expense amount cannot be negative.'
 
 
 def test_add_empty_desc(tmp_path):
     """
-    Test for "add" command.
+    Test for "add" subcommand.
 
     This test checks whether "add" correctly handles an exception when no expense description is provided.
     """
@@ -1182,13 +1195,13 @@ def test_add_empty_desc(tmp_path):
     dt = '13/02/2024'
     runner = CliRunner()
     result = runner.invoke(cli, ['add', amount, desc, '--db-filepath', db_filepath, '--dt', dt])
-    assert result.exit_code == 3
+    assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
 
 def test_add_space_desc(tmp_path):
     """
-    Test for "add" command.
+    Test for "add" subcommand.
 
     This test checks whether "add" correctly handles an exception when an expense description containing only a space is provided.
     """
@@ -1198,13 +1211,13 @@ def test_add_space_desc(tmp_path):
     dt = '13/02/2024'
     runner = CliRunner()
     result = runner.invoke(cli, ['add', amount, desc, '--db-filepath', db_filepath, '--dt', dt])
-    assert result.exit_code == 3
+    assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
 
 def test_add_tab_desc(tmp_path):
     """
-    Test for "add" command.
+    Test for "add" subcommand.
 
     This test checks whether "add" correctly handles an exception when an expense description containing only a tab is provided.
     """
@@ -1214,13 +1227,13 @@ def test_add_tab_desc(tmp_path):
     dt = '13/02/2024'
     runner = CliRunner()
     result = runner.invoke(cli, ['add', amount, desc, '--db-filepath', db_filepath, '--dt', dt])
-    assert result.exit_code == 3
+    assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
 
 def test_add_newline_desc(tmp_path):
     """
-    Test for "add" command.
+    Test for "add" subcommand.
 
     This test checks whether "add" correctly handles an exception when an expense description containing only a new line tag is provided.
     """
@@ -1230,13 +1243,13 @@ def test_add_newline_desc(tmp_path):
     dt = '13/02/2024'
     runner = CliRunner()
     result = runner.invoke(cli, ['add', amount, desc, '--db-filepath', db_filepath, '--dt', dt])
-    assert result.exit_code == 3
+    assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
 
 def test_add_invalid_path():
     """
-    Test for "add" command.
+    Test for "add" subcommand.
 
     This test checks whether "add" correctly handles an exception when an invalid database path is specified.
     """
@@ -1246,13 +1259,13 @@ def test_add_invalid_path():
     dt = '13/02/2024'
     runner = CliRunner()
     result = runner.invoke(cli, ['add', amount, desc, '--db-filepath', db_filepath, '--dt', dt])
-    assert result.exit_code == 4
+    assert result.exit_code == 3
     assert result.output.strip() == f'ERROR: There is no such path: {db_filepath}.'
 
 
 def test_report(tmp_path):
     """
-    Test for "report" command.
+    Test for "report" subcommand.
 
     This test verifies that "report" correctly displays the expense from the database file.
     """
@@ -1268,7 +1281,7 @@ def test_report(tmp_path):
 
 def test_report_show_big(tmp_path):
     """
-    Test for "report" command.
+    Test for "report" subcommand.
 
     This test verifies that "report" correctly tags an expense as big with a "[!]" if the threshold has been reached.
     """
@@ -1287,7 +1300,7 @@ def test_report_show_big(tmp_path):
 
 def test_report_sort_default(tmp_path):
     """
-    Test for "report" command.
+    Test for "report" subcommand.
 
     This test verifies that "report" correctly sorts expenses using the default method.
     """
@@ -1307,7 +1320,7 @@ def test_report_sort_default(tmp_path):
 
 def test_report_sort_default_descending(tmp_path):
     """
-    Test for "report" command.
+    Test for "report" subcommand.
 
     This test verifies that "report" correctly sorts expenses using the default method in descending order.
     """
@@ -1327,7 +1340,7 @@ def test_report_sort_default_descending(tmp_path):
 
 def test_report_sort_date(tmp_path):
     """
-    Test for "report" command.
+    Test for "report" subcommand.
 
     This test verifies that "report" correctly sorts expenses using the "date" method.
     """
@@ -1347,7 +1360,7 @@ def test_report_sort_date(tmp_path):
 
 def test_report_sort_date_descending(tmp_path):
     """
-    Test for "report" command.
+    Test for "report" subcommand.
 
     This test verifies that "report" correctly sorts expenses using the "date" method in descending order.
     """
@@ -1367,7 +1380,7 @@ def test_report_sort_date_descending(tmp_path):
 
 def test_report_sort_amount(tmp_path):
     """
-    Test for "report" command.
+    Test for "report" subcommand.
 
     This test verifies that "report" correctly sorts expenses using the "amount" method.
     """
@@ -1387,7 +1400,7 @@ def test_report_sort_amount(tmp_path):
 
 def test_report_sort_amount_descending(tmp_path):
     """
-    Test for "report" command.
+    Test for "report" subcommand.
 
     This test verifies that "report" correctly sorts expenses using the "amount" method in descending order.
     """
@@ -1407,7 +1420,7 @@ def test_report_sort_amount_descending(tmp_path):
 
 def test_report_python_code(tmp_path):
     """
-    Test for "report" command.
+    Test for "report" subcommand.
 
     This test checks whether "report" displays expenses as a representation of Python code.
     """
@@ -1423,59 +1436,59 @@ def test_report_python_code(tmp_path):
 
 def test_report_db_file_not_exist():
     """
-    Test for "report" command.
+    Test for "report" subcommand.
 
     This test checks whether "report" correctly handles an exception when the database does not exist.
     """
     db_filepath = 'not_exist_file.db'
     runner = CliRunner()
     result = runner.invoke(cli, ['report', '--db-filepath', db_filepath])
-    assert result.exit_code == 5
+    assert result.exit_code == 3
     assert result.output.strip() == f'ERROR: There is no such path: {db_filepath}.'
 
 
 def test_report_db_filepath_missing_extension(tmp_path):
     """
-    Test for "report" command.
+    Test for "report" subcommand.
 
     This test checks whether "report" correctly handles an exception when the database file extension is missing.
     """
     db_filepath = str(tmp_path/'file')
     runner =CliRunner()
     result = runner.invoke(cli, ['report', '--db-filepath', db_filepath])
-    assert result.exit_code == 6
+    assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
 def test_report_db_filepath_another_missing_extension(tmp_path):
     """
-    Test for "report" command.
+    Test for "report" subcommand.
 
     This test checks whether "report" correctly handles an exception when the database file extension is missing.
     """
     db_filepath = str(tmp_path/'file.')
     runner =CliRunner()
     result = runner.invoke(cli, ['report', '--db-filepath', db_filepath])
-    assert result.exit_code == 6
+    assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
 def test_report_db_filepath_unsupported_extension(tmp_path):
     """
-    Test for "report" command.
+    Test for "report" subcommand.
 
     This test checks whether "report" correctly handles an exception when the database file extension is not supported.
     """
     db_filepath = str(tmp_path/'file.txt')
     runner =CliRunner()
     result = runner.invoke(cli, ['report', '--db-filepath', db_filepath])
-    assert result.exit_code == 6
+    assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
 def test_report_empty_db_file(tmp_path):
     """
-    Test for "report" command.
+    Test for "report" subcommand.
 
     This test checks whether "report" correctly handles an exception when the database file is empty.
     """
@@ -1484,13 +1497,13 @@ def test_report_empty_db_file(tmp_path):
     db_file.close()
     runner = CliRunner()
     result = runner.invoke(cli, ['report', '--db-filepath', db_filepath])
-    assert result.exit_code == 7
+    assert result.exit_code == 4
     assert result.output.strip() == 'ERROR: No data has been entered yet, nothing to display.'
 
 
 def test_edit(tmp_path):
     """
-    Test for "edit" command.
+    Test for "edit" subcommand.
 
     This test checks whether "edit" correctly edits expenses in the database file.
     """
@@ -1514,7 +1527,7 @@ def test_edit(tmp_path):
 
 def test_edit_no_atributes(tmp_path):
     """
-    Test for "edit" command.
+    Test for "edit" subcommand.
 
     This test checks whether "edit" correctly handles an exception when no values have been passed to change.
     """
@@ -1528,13 +1541,13 @@ def test_edit_no_atributes(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['edit', id_num, '--db-filepath', db_filepath, '--dt', dt, '--amount', amount, '--desc', desc])
-    assert result.exit_code == 8
+    assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: No values have been passed.'
 
 
 def test_edit_invalid_date(tmp_path):
     """
-    Test for "edit" command.
+    Test for "edit" subcommand.
 
     This test checks whether "edit" correctly handles an exception when an invalid date has passed.
     """
@@ -1548,13 +1561,13 @@ def test_edit_invalid_date(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['edit', id_num, '--db-filepath', db_filepath, '--dt', dt, '--amount', amount, '--desc', desc])
-    assert result.exit_code == 9
+    assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Invalid date format.'
 
 
 def test_edit_database_not_exists():
     """
-    Test for "edit" command.
+    Test for "edit" subcommand.
 
     This test checks whether "edit" correctly handles an exception when the database file does not exist.
     """
@@ -1565,13 +1578,13 @@ def test_edit_database_not_exists():
     desc = 'edited expense'
     runner = CliRunner()
     result = runner.invoke(cli, ['edit', id_num, '--db-filepath', db_filepath, '--dt', dt, '--amount', amount, '--desc', desc])
-    assert result.exit_code == 10
+    assert result.exit_code == 3
     assert result.output.strip() == f'ERROR: There is no such path: {db_filepath}.'
 
 
 def test_add_db_filepath_missing_extension(tmp_path):
     """
-    Test for "edit" command.
+    Test for "edit" subcommand.
 
     This test checks whether "edit" correctly handles an exception when the database file extension is missing.
     """
@@ -1582,13 +1595,13 @@ def test_add_db_filepath_missing_extension(tmp_path):
     desc = 'edited expense'
     runner =CliRunner()
     result = runner.invoke(cli, ['edit', id_num, '--db-filepath', db_filepath, '--dt', dt, '--amount', amount, '--desc', desc])
-    assert result.exit_code == 11
+    assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
 def test_add_db_filepath_another_missing_extension(tmp_path):
     """
-    Test for "edit" command.
+    Test for "edit" subcommand.
 
     This test checks whether "edit" correctly handles an exception when the database file extension is missing.
     """
@@ -1599,13 +1612,13 @@ def test_add_db_filepath_another_missing_extension(tmp_path):
     desc = 'edited expense'
     runner =CliRunner()
     result = runner.invoke(cli, ['edit', id_num, '--db-filepath', db_filepath, '--dt', dt, '--amount', amount, '--desc', desc])
-    assert result.exit_code == 11
+    assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
 def test_add_db_filepath_unsupported_extension(tmp_path):
     """
-    Test for "edit" command.
+    Test for "edit" subcommand.
 
     This test checks whether "edit" correctly handles an exception when the database file extension is not supported.
     """
@@ -1616,13 +1629,13 @@ def test_add_db_filepath_unsupported_extension(tmp_path):
     desc = 'edited expense'
     runner =CliRunner()
     result = runner.invoke(cli, ['edit', id_num, '--db-filepath', db_filepath, '--dt', dt, '--amount', amount, '--desc', desc])
-    assert result.exit_code == 11
+    assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
 def test_edit_empty_database(tmp_path):
     """
-    Test for "edit" command.
+    Test for "edit" subcommand.
 
     This test checks whether "edit" correctly handles an exception when the database file is empty.
     """
@@ -1635,13 +1648,13 @@ def test_edit_empty_database(tmp_path):
     db_file.close()
     runner = CliRunner()
     result = runner.invoke(cli, ['edit', id_num, '--db-filepath', db_filepath, '--dt', dt, '--amount', amount, '--desc', desc])
-    assert result.exit_code == 12
+    assert result.exit_code == 4
     assert result.output.strip() == 'ERROR: No data has been entered yet, nothing to edit.'
 
 
 def test_edit_invalid_id_num(tmp_path):
     """
-    Test for "edit" command.
+    Test for "edit" subcommand.
 
     This test checks whether "edit" correctly handles an exception when the database file does not contain the ID selected for editing.
     """
@@ -1655,13 +1668,13 @@ def test_edit_invalid_id_num(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['edit', id_num, '--db-filepath', db_filepath, '--dt', dt, '--amount', amount, '--desc', desc])
-    assert result.exit_code == 13
+    assert result.exit_code == 2
     assert result.output.strip() == f'ERROR: ID {id_num}# not exists in database.'
 
 
 def test_edit_0_amount(tmp_path):
     """
-    Test for "edit" command.
+    Test for "edit" subcommand.
 
     This test checks whether "edit" correctly handles an exception when a zero expense amount is provided.
     """
@@ -1675,13 +1688,13 @@ def test_edit_0_amount(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['edit', id_num, '--db-filepath', db_filepath, '--dt', dt, '--amount', amount, '--desc', desc])
-    assert result.exit_code == 13
+    assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: The expense amount cannot be zero.'
 
 
 def test_edit_negative_amount(tmp_path):
     """
-    Test for "edit" command.
+    Test for "edit" subcommand.
 
     This test checks whether "edit" correctly handles an exception when a negative expense amount is provided.
     """
@@ -1695,13 +1708,13 @@ def test_edit_negative_amount(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['edit', id_num, '--db-filepath', db_filepath, '--dt', dt, '--amount', amount, '--desc', desc])
-    assert result.exit_code == 13
+    assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: The expense amount cannot be negative.'
 
 
 def test_edit_empty_desc(tmp_path):
     """
-    Test for "edit" command.
+    Test for "edit" subcommand.
 
     This test checks whether "edit" correctly handles an exception when a empty expense description is provided.
     """
@@ -1715,13 +1728,13 @@ def test_edit_empty_desc(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['edit', id_num, '--db-filepath', db_filepath, '--dt', dt, '--amount', amount, '--desc', desc])
-    assert result.exit_code == 13
+    assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
 
 def test_edit_space_desc(tmp_path):
     """
-    Test for "edit" command.
+    Test for "edit" subcommand.
 
     This test checks whether "edit" correctly handles an exception when an expense description containing only a space is provided.
     """
@@ -1735,13 +1748,13 @@ def test_edit_space_desc(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['edit', id_num, '--db-filepath', db_filepath, '--dt', dt, '--amount', amount, '--desc', desc])
-    assert result.exit_code == 13
+    assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
 
 def test_edit_tab_desc(tmp_path):
     """
-    Test for "edit" command.
+    Test for "edit" subcommand.
 
     This test checks whether "edit" correctly handles an exception when an expense description containing only a tab is provided.
     """
@@ -1755,13 +1768,13 @@ def test_edit_tab_desc(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['edit', id_num, '--db-filepath', db_filepath, '--dt', dt, '--amount', amount, '--desc', desc])
-    assert result.exit_code == 13
+    assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
 
 def test_edit_newline_desc(tmp_path):
     """
-    Test for "edit" command.
+    Test for "edit" subcommand.
 
     This test checks whether "edit" correctly handles an exception when an expense description containing only a new line tag is provided.
     """
@@ -1775,13 +1788,13 @@ def test_edit_newline_desc(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['edit', id_num, '--db-filepath', db_filepath, '--dt', dt, '--amount', amount, '--desc', desc])
-    assert result.exit_code == 13
+    assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
 
 def test_import_from_with_content_expenses_empty(tmp_path):
     """
-    Test for "import-from" command.
+    Test for "import-from" subcommand.
 
     This test verifies that "import-from" correctly writes expenses from a file to a database file that contains other expenses.
     """
@@ -1807,7 +1820,7 @@ def test_import_from_with_content_expenses_empty(tmp_path):
 
 def test_import_from_with_content_expenses_not_exist(tmp_path):
     """
-    Test for "import-from" command.
+    Test for "import-from" subcommand.
 
     This test verifies that "import-from" correctly creates a database file and writes expenses from the file to it.
     """
@@ -1831,7 +1844,7 @@ def test_import_from_with_content_expenses_not_exist(tmp_path):
 
 def test_import_from_with_content_user_dt(tmp_path):
     """
-    Test for "import-from" command.
+    Test for "import-from" subcommand.
 
     This test verifies that "import-from" correctly writes expenses from the file with the given date to the database file.
     """
@@ -1855,7 +1868,7 @@ def test_import_from_with_content_user_dt(tmp_path):
 
 def test_import_from_missing_extension_in_csv_filepath(tmp_path):
     """
-    Test for "import-from" command.
+    Test for "import-from" subcommand.
 
     This test checks whether "import-from" correctly handles an exception when the imported file has no extension.
     """
@@ -1866,13 +1879,13 @@ def test_import_from_missing_extension_in_csv_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 15
+    assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
 def test_import_from_another_missing_extension_in_csv_filepath(tmp_path):
     """
-    Test for "import-from" command.
+    Test for "import-from" subcommand.
 
     This test checks whether "import-from" correctly handles an exception when the imported file has an invalid extension.
     """
@@ -1883,13 +1896,13 @@ def test_import_from_another_missing_extension_in_csv_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 15
+    assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
 def test_import_from_unsupported_extension_in_csv_filepath(tmp_path):
     """
-    Test for "import-from" command.
+    Test for "import-from" subcommand.
 
     This test checks whether "import-from" correctly handles an exception when the imported file has an invalid extension.
     """
@@ -1900,13 +1913,13 @@ def test_import_from_unsupported_extension_in_csv_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 15
+    assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
 def test_import_from_missing_extension_in_db_filepath(tmp_path):
     """
-    Test for "import-from" command.
+    Test for "import-from" subcommand.
 
     This test checks whether "import-from" correctly handles an exception when the database file extension is missing.
     """
@@ -1917,13 +1930,13 @@ def test_import_from_missing_extension_in_db_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 16
+    assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
 def test_import_from_another_missing_extension_in_db_filepath(tmp_path):
     """
-    Test for "import-from" command.
+    Test for "import-from" subcommand.
 
     This test checks whether "import-from" correctly handles an exception when the database file extension is missing.
     """
@@ -1934,13 +1947,13 @@ def test_import_from_another_missing_extension_in_db_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 16
+    assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
 def test_import_from_unsupported_extension_in_db_filepath(tmp_path):
     """
-    Test for "import-from" command.
+    Test for "import-from" subcommand.
 
     This test checks whether "import-from" correctly handles an exception when the database file extension is not supported.
     """
@@ -1951,13 +1964,13 @@ def test_import_from_unsupported_extension_in_db_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 16
+    assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
 def test_import_from_csv_not_exist(tmp_path):
     """
-    Test for "import-from" command.
+    Test for "import-from" subcommand.
 
     This test checks whether "import-from" correctly handles an exception when the imported file does not exist.
     """
@@ -1965,13 +1978,13 @@ def test_import_from_csv_not_exist(tmp_path):
     db_filepath = tmp_path/'file.db'
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 17
+    assert result.exit_code == 3
     assert result.output.strip() == 'ERROR: File not exist.'
 
 
 def test_import_from_only_headers_in_csv(tmp_path):
     """
-    Test for "import-from" command.
+    Test for "import-from" subcommand.
 
     This test checks whether "import-from" correctly handles an exception when the imported file contains only headers.
     """
@@ -1983,13 +1996,13 @@ def test_import_from_only_headers_in_csv(tmp_path):
         writer.writeheader()
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 18
+    assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing file content.'
 
 
 def test_import_from_empty_csv(tmp_path):
     """
-    Test for "import-from" command.
+    Test for "import-from" subcommand.
 
     This test checks whether "import-from" correctly handles an exception when the imported file is empty.
     """
@@ -1999,13 +2012,13 @@ def test_import_from_empty_csv(tmp_path):
     stream.close()
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 18
+    assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing file content.'
 
 
 def test_import_from_invalid_headers_in_csv(tmp_path):
     """
-    Test for "import-from" command.
+    Test for "import-from" subcommand.
 
     This test checks whether "import-from" correctly handles an exception when the imported file contains invalid headers.
     """
@@ -2018,13 +2031,13 @@ def test_import_from_invalid_headers_in_csv(tmp_path):
         writer.writerow({'inv_amount': 10, 'inv_desc': 'first expense'})
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 19
+    assert result.exit_code == 5
     assert result.output.strip() == f'ERROR: Invalid headers in {csv_filepath}.'
 
 
 def test_import_from_invalid_user_dt(tmp_path):
     """
-    Test for "import-from" command.
+    Test for "import-from" subcommand.
 
     This test checks whether "import-from" correctly handles an exception when an invalid date format is provided.
     """
@@ -2038,13 +2051,13 @@ def test_import_from_invalid_user_dt(tmp_path):
         writer.writerow({'amount': 10, 'desc': 'first expense'})
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath, '--dt', dt])
-    assert result.exit_code == 20
+    assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Invalid date format.'
 
 
 def test_import_from_0_amount_in_csv(tmp_path):
     """
-    Test for "import-from" command.
+    Test for "import-from" subcommand.
 
     This test checks whether "import-from" correctly handles an exception when one of the imported amounts is 0.
     """
@@ -2057,13 +2070,13 @@ def test_import_from_0_amount_in_csv(tmp_path):
         writer.writerow({'amount': 0, 'desc': 'first expense'})
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 21
+    assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: The expense amount cannot be zero.'
 
 
 def test_import_from_negative_amount_in_csv(tmp_path):
     """
-    Test for "import-from" command.
+    Test for "import-from" subcommand.
 
     This test checks whether "import-from" correctly handles an exception when one of the imported amounts is negative.
     """
@@ -2076,13 +2089,13 @@ def test_import_from_negative_amount_in_csv(tmp_path):
         writer.writerow({'amount': -1, 'desc': 'first expense'})
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 21
+    assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: The expense amount cannot be negative.'
 
 
 def test_import_from_no_desc_in_csv(tmp_path):
     """
-    Test for "import-from" command.
+    Test for "import-from" subcommand.
 
     This test checks whether "import-from" correctly handles an exception when one of the imported descriptions is empty.
     """
@@ -2095,13 +2108,13 @@ def test_import_from_no_desc_in_csv(tmp_path):
         writer.writerow({'amount': 10, 'desc': ''})
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 21
+    assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
 
 def test_import_from_space_desc_in_csv(tmp_path):
     """
-    Test for "import-from" command.
+    Test for "import-from" subcommand.
 
     This test checks whether "import-from" correctly handles an exception when one of the imported descriptions contains only a space.
     """
@@ -2114,13 +2127,13 @@ def test_import_from_space_desc_in_csv(tmp_path):
         writer.writerow({'amount': 10, 'desc': ' '})
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 21
+    assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
 
 def test_import_from_tab_desc_in_csv(tmp_path):
     """
-    Test for "import-from" command.
+    Test for "import-from" subcommand.
 
     This test checks whether "import-from" correctly handles an exception when one of the imported descriptions contains only a tab.
     """
@@ -2133,13 +2146,13 @@ def test_import_from_tab_desc_in_csv(tmp_path):
         writer.writerow({'amount': 10, 'desc': ' '})
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 21
+    assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
 
 def test_import_from_newline_desc_in_csv(tmp_path):
     """
-    Test for "import-from" command.
+    Test for "import-from" subcommand.
 
     This test checks whether "import-from" correctly handles an exception when one of the imported descriptions contains only a newline tag.
     """
@@ -2152,13 +2165,13 @@ def test_import_from_newline_desc_in_csv(tmp_path):
         writer.writerow({'amount': 10, 'desc': '\n'})
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 21
+    assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
 
 def test_import_from_invalid_db_path(tmp_path):
     """
-    Test for "import-from" command.
+    Test for "import-from" subcommand.
 
     This test checks whether "import-from" correctly handles an exception when the database file path is invalid.
     """
@@ -2171,13 +2184,13 @@ def test_import_from_invalid_db_path(tmp_path):
         writer.writerow({'amount': 10, 'desc': 'first expense'})
     runner = CliRunner()
     result = runner.invoke(cli, ['import-from', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 22
+    assert result.exit_code == 3
     assert result.output.strip() == f'ERROR: There is no such path: {db_filepath}.'
 
 
 def test_export_to(tmp_path):
     """
-    Test for "export-to" command.
+    Test for "export-to" subcommand.
 
     This test verifies that "export-to" correctly writes expenses from the database file to the external file.
     """
@@ -2199,7 +2212,7 @@ def test_export_to(tmp_path):
 
 def test_export_to_1_csv_filepath_already_exist(tmp_path):
     """
-    Test for "export-to" command.
+    Test for "export-to" subcommand.
 
     This test checks whether "export-to" correctly generates a new name for an external file if a file with the same name already exists.
     """
@@ -2219,7 +2232,7 @@ def test_export_to_1_csv_filepath_already_exist(tmp_path):
 
 def test_export_to_1_2_csv_filepath_already_exists(tmp_path):
     """
-    Test for "export-to" command.
+    Test for "export-to" subcommand.
 
     This test checks whether "export-to" correctly generates a new names for an external file if a files with the same name already exists.
     """
@@ -2242,7 +2255,7 @@ def test_export_to_1_2_csv_filepath_already_exists(tmp_path):
 
 def test_export_to_2_csv_filepath_already_exist(tmp_path):
     """
-    Test for "export-to" command.
+    Test for "export-to" subcommand.
 
     This test checks that "export-to" correctly ignores a previously generated name if a name for the external file is not already in use.
     """
@@ -2262,7 +2275,7 @@ def test_export_to_2_csv_filepath_already_exist(tmp_path):
 
 def test_export_to_missing_extension_in_csv_filepath(tmp_path):
     """
-    Test for "export-to" command.
+    Test for "export-to" subcommand.
 
     This test checks whether "export-to" correctly handles an exception when the external file does not have an extension.
     """
@@ -2273,13 +2286,13 @@ def test_export_to_missing_extension_in_csv_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['export-to', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 23
+    assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
 def test_export_to_another_missing_extension_in_csv_filepath(tmp_path):
     """
-    Test for "export-to" command.
+    Test for "export-to" subcommand.
 
     This test checks whether "export-to" correctly handles an exception when an external file has an invalid extension.
     """
@@ -2290,13 +2303,13 @@ def test_export_to_another_missing_extension_in_csv_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['export-to', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 23
+    assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
 def test_export_to_unsupported_extension_in_csv_filepath(tmp_path):
     """
-    Test for "export-to" command.
+    Test for "export-to" subcommand.
 
     This test checks whether "export-to" correctly handles an exception when an external file has an invalid extension.
     """
@@ -2307,13 +2320,13 @@ def test_export_to_unsupported_extension_in_csv_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['export-to', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 23
+    assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
 def test_export_to_db_file_not_exist(tmp_path):
     """
-    Test for "export-to" command.
+    Test for "export-to" subcommand.
 
     This test checks whether "export-to" correctly handles an exception when the database file does not exist.
     """
@@ -2321,13 +2334,13 @@ def test_export_to_db_file_not_exist(tmp_path):
     db_filepath = 'not_exist_file.db'
     runner = CliRunner()
     result = runner.invoke(cli, ['export-to', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 24
+    assert result.exit_code == 3
     assert result.output.strip() == f'ERROR: There is no such path: {db_filepath}.'
 
 
 def test_export_to_missing_extension_in_db_filepath(tmp_path):
     """
-    Test for "export-to" command.
+    Test for "export-to" subcommand.
 
     This test checks whether "export-to" correctly handles an exception when the database file extension is missing.
     """
@@ -2338,13 +2351,13 @@ def test_export_to_missing_extension_in_db_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['export-to', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 25
+    assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
 def test_export_to_another_missing_extension_in_db_filepath(tmp_path):
     """
-    Test for "export-to" command.
+    Test for "export-to" subcommand.
 
     This test checks whether "export-to" correctly handles an exception when the database file extension is missing.
     """
@@ -2355,13 +2368,13 @@ def test_export_to_another_missing_extension_in_db_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['export-to', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 25
+    assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
 def test_export_to_unsupported_extension_in_db_filepath(tmp_path):
     """
-    Test for "export-to" command.
+    Test for "export-to" subcommand.
 
     This test checks whether "export-to" correctly handles an exception when the database file extension is unsupported.
     """
@@ -2372,13 +2385,13 @@ def test_export_to_unsupported_extension_in_db_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['export-to', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 25
+    assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
 
 def test_export_to_empty_db_file(tmp_path):
     """
-    Test for "export-to" command.
+    Test for "export-to" subcommand.
 
     This test checks whether "export-to" correctly handles an exception when the database file is empty.
     """
@@ -2388,13 +2401,13 @@ def test_export_to_empty_db_file(tmp_path):
     db_file.close()
     runner = CliRunner()
     result = runner.invoke(cli, ['export-to', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 26
+    assert result.exit_code == 4
     assert result.output.strip() == 'ERROR: No data has been entered yet, nothing to write.'
 
 
 def test_export_to_invalid_csv_filepath(tmp_path):
     """
-    Test for "export-to" command.
+    Test for "export-to" subcommand.
 
     This test checks whether "export-to" correctly handles an exception when the path to an external file is invalid.
     """
@@ -2405,5 +2418,5 @@ def test_export_to_invalid_csv_filepath(tmp_path):
         dump(expenses, stream)
     runner = CliRunner()
     result = runner.invoke(cli, ['export-to', csv_filepath, '--db-filepath', db_filepath])
-    assert result.exit_code == 27
+    assert result.exit_code == 3
     assert result.output.strip() == f'ERROR: There is no such path: {csv_filepath}.'
