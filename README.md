@@ -4,7 +4,7 @@
 
 :memo: Management is done via text mode in the terminal, and uses click library to divide program into subcommands ("add", "report", "edit", "import-from", "export-to").
 
-This is my extension of the project from module 7 completed during the Praktyczny Python course.
+This is my extension of the project from module 7 completed during the Praktyczny Python (eng: Practical Python) course.
 
 ## The expense consists of:
 - ID - assigned by the program when creating an expense
@@ -44,6 +44,7 @@ This is my extension of the project from module 7 completed during the Praktyczn
 ├── data
 │       ├── budget.db
 │       └── example_expenses.csv
+├── original_solution
 ├── src
 │       └── run.py
 ├── tests
@@ -55,19 +56,21 @@ This is my extension of the project from module 7 completed during the Praktyczn
 ├── README.md
 └── requirements.txt
 ```
+:bulb: There is a directory original_solution which contains my first version of this project written during the course, so it is possible to compare the development of this project.
+
 ## Usage:
 :bulb: You can use all options of each command in any configuration. There are no conflicts between them.
 
 ### "add" command:
 :memo: Requires entering the amount and description of the expense. Optionally, you can enter a path to a custom database file and a date, otherwise the default path and today's date will be used.
     
-    python run.py add 149.99 "Telephon installment"
+    python src/run.py add 149.99 "Telephon installment"
 This will add a new entry to the database file (default: "data/budget.db"). If the database does not already exist, a new one will be started.
     
-    python run.py add 50 "Small shopping" --db-filepath=custom_dir/custom_file.db
+    python src/run.py add 50 "Small shopping" --db-filepath=custom_dir/custom_file.db
 This will add a new expense to the user-specified database file. If the database does not already exist, a new one will be started.
 
-    python run.py add .99 "Chewing gum" --dt=13-09-1877
+    python src/run.py add .99 "Chewing gum" --dt=13-09-1877
 This will add a new expense to the database file with the date you specified (default is today's date). You can pass any existing separators, the program will change them to "/".
 
 ---
@@ -75,19 +78,19 @@ This will add a new expense to the database file with the date you specified (de
 ### "report" command:
 :memo: Optionally, you can enter the path to a custom database, select a sorting method and change the order, or display expenses as Python code.
 
-    python run.py report
+    python src/run.py report
 This will display the database file as an expense table.
 
-    python run.py report --db-filepath=custom_dir/custom_file.db
+    python src/run.py report --db-filepath=custom_dir/custom_file.db
 This will display the database from the file you specified.
 
-    python run.py report --sort=date
+    python src/run.py report --sort=date
 This will sort expenses by date, by default they are sorted by ID's.
 
-    python run.py report --sort=amount
+    python src/run.py report --sort=amount
 This will sort expenses by amount.
 
-    python run.py report --descending
+    python src/run.py report --descending
 This will change the order of expenses to descending, by default they are in ascending order.
 
 ---
@@ -117,13 +120,13 @@ This will edit all expense component values.
 ### "import-from" command:
 :memo: Requires a path to an external expense file that will be imported into the database. It only imports amounts and descriptions, a new ID and date will be assigned. Optionally, you can enter a path to a custom database file and a date, otherwise the default path and today's date will be used.
     
-    python run.py import-from dir/file.csv
+    python src/run.py import-from dir/file.csv
 This will import the amounts and descriptions of expenses into a database file, generates new ID numbers and date(today's date).
 
-    python run.py import-from dir/file.csv --db-filepath=custom_dir/custom_file.db
+    python src/run.py import-from dir/file.csv --db-filepath=custom_dir/custom_file.db
 This will import expenses to database file specified by user.
 
-    python run.py import-from dir/file.csv --dt=13-05-2005
+    python src/run.py import-from dir/file.csv --dt=13-05-2005
 This will import expenses and adds the user's date to them. User can pass any separators to date, this program will change them to "/".
 
 ---
@@ -131,8 +134,8 @@ This will import expenses and adds the user's date to them. User can pass any se
 ### "export-to" command:
 :memo: Requires the path to the file where the expense file will be exported. Optionally, you can enter a path to a custom database file, otherwise the default path will be used.
 
-    python run.py export-to dir/file.csv
+    python src/run.py export-to dir/file.csv
 This will export expenses to external CSV file.
 
-    python run.py export-to dir/dir/file.csv --db-filepath=dir/database.db
+    python src/run.py export-to dir/dir/file.csv --db-filepath=dir/database.db
 This will export expenses from database file specified by user.

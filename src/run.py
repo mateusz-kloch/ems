@@ -47,7 +47,7 @@ DEFAULT_DB_FILEPATH = 'data/budget.db'
 DT_FORMAT = '%d/%m/%Y'
 
 HELP_ADD = 'Add new expense to datebase.'
-HELP_OPTION_DB_FILEPATH = 'Enter path to database file, default: budget.db'
+HELP_OPTION_DB_FILEPATH = 'Enter path to database file, default: data/budget.db'
 HELP_OPTION_DT = 'Enter your date, it is recommended to enter day first. If not specified, uses today\'s date.'
 HELP_REPORT = 'Viem expenses database as table.'
 HELP_REPORT_OPTION_SORT = 'View expenses sorted by "date" or "amount", by default they are sorted by id numbers.'
@@ -476,7 +476,7 @@ def edit(id_num: int, db_filepath: str, dt: str|None, amount: float|None, desc: 
     """
     Edits components of expense in database.
     The expense to be edited is identified by an id number.
-    If no option is specified (--dt, --amount, --desc) or it is empty, no changes will be made.
+    If no option is specified (--dt, --amount, --desc) or option is empty, no changes will be made.
 
     Args:
         id-num (int): The identification number of the expense that will be edited.
