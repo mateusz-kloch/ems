@@ -1,4 +1,4 @@
-# awdawfawgfqag EMS (EXPENSE MANAGEMENT SYSTEM)
+# EMS (EXPENSE MANAGEMENT SYSTEM)
 
 ## This program was created with you in mind, so that you can control and manage your budget. You can create your own database, manually add expenses to it or import them from CSV files, edit expenses in the database, and extract the database as an expense report to external CSV file.
 
