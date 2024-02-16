@@ -34,11 +34,14 @@ This is my extension of the project from module 7 completed during the Praktyczn
     - dateutil 2.8.2
     - pytest 7.4.4
 
+:bulb: All necessary tools are pre-installed in the virtual environment.
+
 :warning: Compatibility with previous versions not tested.
 
 ## Repository layout:
 :memo: src/run.py - A main script of this project.
 ```
+├── .venv
 ├── data
 │       ├── budget.db
 │       └── example_expenses.csv
