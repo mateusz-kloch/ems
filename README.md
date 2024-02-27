@@ -39,7 +39,6 @@ This is my extension of the project from module 7 completed during the Praktyczn
 ## Repository layout:
 :memo: src/run.py - A main script of this project.
 ```
-├── .venv
 ├── data
 │       ├── budget.db
 │       └── example_expenses.csv
