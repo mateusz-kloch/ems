@@ -20,7 +20,7 @@ This is my extension of the project from module 7 completed during the Praktyczn
 ## Programming tools:
 
 ### Language:
-- Python 3.11.6
+- Python 3.12
 
   ### Libraries:
     - csv
@@ -30,11 +30,9 @@ This is my extension of the project from module 7 completed during the Praktyczn
     - sys
 
   ### Third party libraries:
-    - click 8.1.7
-    - dateutil 2.8.2
-    - pytest 7.4.4
-
-:warning: Compatibility with previous versions not tested.
+    - click
+    - dateutil
+    - pytest
 
 ## Repository layout:
 :memo: src/run.py - A main script of this project.
