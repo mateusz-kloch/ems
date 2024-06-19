@@ -30,8 +30,6 @@ Exit codes:
 
 For usage examples, see the commands docs.
 """
-
-
 from csv import DictReader, DictWriter
 from dataclasses import dataclass
 from datetime import date
@@ -68,7 +66,6 @@ class UserExpense:
     amount: float
     desc: str
 
-
     def __post_init__(self) -> ValueError:
         if self.amount == 0:
             raise ValueError('The expense amount cannot be zero.')
@@ -77,7 +74,6 @@ class UserExpense:
         if not self.desc or self.desc.isspace():
             raise ValueError('Missing description for the expense.')
     
-
     def is_big(self) -> bool:
         return self.amount >= BIG_EXPENSE_THRESHOLD
 
