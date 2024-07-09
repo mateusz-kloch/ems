@@ -1,9 +1,9 @@
+.dev
+
 .venv
 
 .pytest_cache
 
 __pycache__/
 
-notes.txt
-
-scratchpad.py
+src/db_config.py
