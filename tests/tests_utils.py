@@ -2,10 +2,9 @@
 This script serves as a toolkit for run.py tests.
 All args for a given function are the same as for the command it inits.
 """
-
-
 from click.testing import CliRunner
 from src.run import cli
+
 
 def init_add(amount, desc, db_filepath, dt):
     """
