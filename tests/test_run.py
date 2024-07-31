@@ -2,8 +2,14 @@ from csv import DictReader, DictWriter
 from pickle import load, dump
 from datetime import date
 
-from src.run import UserExpense
-from utils import test_utils
+from src.utils import UserExpense
+from tests_utils import (
+    init_add,
+    init_edit,
+    init_export_to,
+    init_import_from,
+    init_report
+)
 
 
 def test_add_db_exist(tmp_path):
@@ -16,7 +22,7 @@ def test_add_db_exist(tmp_path):
     dt = None
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
+    result = init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
     with open(db_filepath, 'rb') as stream:
         restored = load(stream)
     expect_dt = date.today().strftime('%d/%m/%Y')
@@ -39,7 +45,7 @@ def test_add_with_dt_db_exist(tmp_path):
     dt = '13/02/2024'
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
+    result = init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
     with open(db_filepath, 'rb') as stream:
         restored = load(stream)
     expect = [
@@ -58,7 +64,7 @@ def test_add_empty_db_file(tmp_path):
     dt = None
     db_file = open(db_filepath, 'wb')
     db_file.close()
-    result = test_utils.init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
+    result = init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
     with open(db_filepath, 'rb') as stream:
         restored = load(stream)
     expect_dt = date.today().strftime('%d/%m/%Y')
@@ -75,7 +81,7 @@ def test_add_with_dt_empty_db_file(tmp_path):
     dt = '01/02/2003'
     db_file = open(db_filepath, 'wb')
     db_file.close()
-    result = test_utils.init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
+    result = init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
     with open(db_filepath, 'rb') as stream:
         restored = load(stream)
     expect = [UserExpense(id_num=1, dt='01/02/2003', amount=1.5, desc='expense')]
@@ -89,7 +95,7 @@ def test_add_db_not_exist(tmp_path):
     desc = 'expense'
     db_filepath = tmp_path/'file.db'
     dt = None
-    result = test_utils.init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
+    result = init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
     with open(db_filepath, 'rb') as stream:
         restored = load(stream)
     expect_dt = date.today().strftime('%d/%m/%Y')
@@ -104,7 +110,7 @@ def test_add_with_dt_db_not_exist(tmp_path):
     desc = 'expense'
     db_filepath = tmp_path/'file.db'
     dt = '13/02/2024'
-    result = test_utils.init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
+    result = init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
     with open(db_filepath, 'rb') as stream:
         restored = load(stream)
     expect = [UserExpense(id_num=1, dt='13/02/2024', amount=1.5, desc='expense')]
@@ -118,7 +124,7 @@ def test_add_db_filepath_missing_extension(tmp_path):
     amount = '1'
     desc = 'expense'
     dt = None
-    result = test_utils.init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
+    result = init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
@@ -128,7 +134,7 @@ def test_add_db_filepath_another_missing_extension(tmp_path):
     amount = '1'
     desc = 'expense'
     dt = None
-    result = test_utils.init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
+    result = init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
@@ -138,7 +144,7 @@ def test_add_db_filepath_unsupported_extension(tmp_path):
     amount = '1'
     desc = 'expense'
     dt = None
-    result = test_utils.init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
+    result = init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
@@ -148,7 +154,7 @@ def test_add_invalid_dt(tmp_path):
     desc = 'expense'
     db_filepath = tmp_path/'file.db'
     dt = 'asd'
-    result = test_utils.init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
+    result = init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Invalid date format.'
 
@@ -158,7 +164,7 @@ def test_add_zero_amount(tmp_path):
     desc = 'expense'
     db_filepath = tmp_path/'file.db'
     dt = None
-    result = test_utils.init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
+    result = init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: The expense amount cannot be zero.'
     
@@ -168,7 +174,7 @@ def test_add_negative_amount(tmp_path):
     desc = 'expense'
     db_filepath = tmp_path/'file.db'
     dt = None
-    result = test_utils.init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
+    result = init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: The expense amount cannot be negative.'
 
@@ -178,7 +184,7 @@ def test_add_empty_desc(tmp_path):
     desc = ''
     db_filepath = tmp_path/'file.db'
     dt = None
-    result = test_utils.init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
+    result = init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
@@ -188,7 +194,7 @@ def test_add_space_desc(tmp_path):
     desc = ' '
     db_filepath = tmp_path/'file.db'
     dt = None
-    result = test_utils.init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
+    result = init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
@@ -198,7 +204,7 @@ def test_add_tab_desc(tmp_path):
     desc = ' '
     db_filepath = tmp_path/'file.db'
     dt = None
-    result = test_utils.init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
+    result = init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
@@ -208,7 +214,7 @@ def test_add_newline_desc(tmp_path):
     desc = '\n'
     db_filepath = tmp_path/'file.db'
     dt = None
-    result = test_utils.init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
+    result = init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
@@ -218,7 +224,7 @@ def test_add_invalid_path():
     desc = 'expense'
     db_filepath = 'invalid_dir/file.db'
     dt = None
-    result = test_utils.init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
+    result = init_add(amount=amount, desc=desc, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 3
     assert result.output.strip() == f'ERROR: There is no such path: {db_filepath}.'
 
@@ -231,7 +237,7 @@ def test_report(tmp_path):
     python = False
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
+    result = init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
     assert result.exit_code == 0
     assert result.output.strip() == '~~ID~~ ~~~DATE~~~ ~~AMOUNT~~ ~~BIG~~ ~~~DESCRIPTION~~~\n~~~~~~ ~~~~~~~~~~ ~~~~~~~~~~ ~~~~~~~ ~~~~~~~~~~~~~~~~~\n    1# 13/11/1954     124.65         first expense\n~~~~~~~~~~~~~~~~~\nTotal:     124.65'
 
@@ -247,7 +253,7 @@ def test_report_show_big(tmp_path):
     python = False
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
+    result = init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
     assert result.exit_code == 0
     assert result.output.strip() == '~~ID~~ ~~~DATE~~~ ~~AMOUNT~~ ~~BIG~~ ~~~DESCRIPTION~~~\n~~~~~~ ~~~~~~~~~~ ~~~~~~~~~~ ~~~~~~~ ~~~~~~~~~~~~~~~~~\n    1# 13/11/1954     499.00         first expense\n    2# 12/03/2023     500.00   [!]   second expense\n~~~~~~~~~~~~~~~~~\nTotal:     999.00'
 
@@ -264,7 +270,7 @@ def test_report_sort_default(tmp_path):
     python = False
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
+    result = init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
     assert result.exit_code == 0
     assert result.output.strip() == '~~ID~~ ~~~DATE~~~ ~~AMOUNT~~ ~~BIG~~ ~~~DESCRIPTION~~~\n~~~~~~ ~~~~~~~~~~ ~~~~~~~~~~ ~~~~~~~ ~~~~~~~~~~~~~~~~~\n    1# 13/11/1954     124.65         first expense\n    2# 12/09/2021     300.00         second expense\n    3# 02/05/1999     499.00         third expense\n~~~~~~~~~~~~~~~~~\nTotal:     923.65'
 
@@ -281,7 +287,7 @@ def test_report_sort_default_descending(tmp_path):
     python = False
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
+    result = init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
     assert result.exit_code == 0
     assert result.output.strip() == '~~ID~~ ~~~DATE~~~ ~~AMOUNT~~ ~~BIG~~ ~~~DESCRIPTION~~~\n~~~~~~ ~~~~~~~~~~ ~~~~~~~~~~ ~~~~~~~ ~~~~~~~~~~~~~~~~~\n    3# 02/05/1999     499.00         third expense\n    2# 12/09/2021     300.00         second expense\n    1# 13/11/1954     124.65         first expense\n~~~~~~~~~~~~~~~~~\nTotal:     923.65'
 
@@ -298,7 +304,7 @@ def test_report_sort_date(tmp_path):
     python = False
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
+    result = init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
     assert result.exit_code == 0
     assert result.output.strip() == '~~ID~~ ~~~DATE~~~ ~~AMOUNT~~ ~~BIG~~ ~~~DESCRIPTION~~~\n~~~~~~ ~~~~~~~~~~ ~~~~~~~~~~ ~~~~~~~ ~~~~~~~~~~~~~~~~~\n    1# 13/11/1954     124.65         first expense\n    3# 02/05/1999     499.00         third expense\n    2# 12/09/2021     300.00         second expense\n~~~~~~~~~~~~~~~~~\nTotal:     923.65'
 
@@ -315,7 +321,7 @@ def test_report_sort_date_descending(tmp_path):
     python = False
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
+    result = init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
     assert result.exit_code == 0
     assert result.output.strip() == '~~ID~~ ~~~DATE~~~ ~~AMOUNT~~ ~~BIG~~ ~~~DESCRIPTION~~~\n~~~~~~ ~~~~~~~~~~ ~~~~~~~~~~ ~~~~~~~ ~~~~~~~~~~~~~~~~~\n    2# 12/09/2021     300.00         second expense\n    3# 02/05/1999     499.00         third expense\n    1# 13/11/1954     124.65         first expense\n~~~~~~~~~~~~~~~~~\nTotal:     923.65'
 
@@ -332,7 +338,7 @@ def test_report_sort_amount(tmp_path):
     python = False
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
+    result = init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
     assert result.exit_code == 0
     assert result.output.strip() == '~~ID~~ ~~~DATE~~~ ~~AMOUNT~~ ~~BIG~~ ~~~DESCRIPTION~~~\n~~~~~~ ~~~~~~~~~~ ~~~~~~~~~~ ~~~~~~~ ~~~~~~~~~~~~~~~~~\n    1# 13/11/1954     124.65         first expense\n    2# 12/09/2021     300.00         second expense\n    3# 02/05/1999     499.00         third expense\n~~~~~~~~~~~~~~~~~\nTotal:     923.65'
 
@@ -349,7 +355,7 @@ def test_report_sort_amount_descending(tmp_path):
     python = False
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
+    result = init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
     assert result.exit_code == 0
     assert result.output.strip() == '~~ID~~ ~~~DATE~~~ ~~AMOUNT~~ ~~BIG~~ ~~~DESCRIPTION~~~\n~~~~~~ ~~~~~~~~~~ ~~~~~~~~~~ ~~~~~~~ ~~~~~~~~~~~~~~~~~\n    3# 02/05/1999     499.00         third expense\n    2# 12/09/2021     300.00         second expense\n    1# 13/11/1954     124.65         first expense\n~~~~~~~~~~~~~~~~~\nTotal:     923.65'
 
@@ -362,7 +368,7 @@ def test_report_python_code(tmp_path):
     python = True
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
+    result = init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
     assert result.exit_code == 0
     assert result.output.strip() == '[UserExpense(id_num=1, dt=\'12/03/2001\', amount=12, desc=\'first expense\')]'
 
@@ -372,7 +378,7 @@ def test_report_db_file_not_exist():
     sort = None
     descending = False
     python = False
-    result = test_utils.init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
+    result = init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
     assert result.exit_code == 3
     assert result.output.strip() == f'ERROR: There is no such path: {db_filepath}.'
 
@@ -382,7 +388,7 @@ def test_report_db_filepath_missing_extension(tmp_path):
     sort = None
     descending = False
     python = False
-    result = test_utils.init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
+    result = init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
     assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
@@ -392,7 +398,7 @@ def test_report_db_filepath_another_missing_extension(tmp_path):
     sort = None
     descending = False
     python = False
-    result = test_utils.init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
+    result = init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
     assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
@@ -402,7 +408,7 @@ def test_report_db_filepath_unsupported_extension(tmp_path):
     sort = None
     descending = False
     python = False
-    result = test_utils.init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
+    result = init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
     assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
@@ -414,7 +420,7 @@ def test_report_empty_db_file(tmp_path):
     python = False
     db_file = open(db_filepath, 'wb')
     db_file.close()
-    result = test_utils.init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
+    result = init_report(db_filepath=db_filepath, sort=sort, descending=descending, python=python)
     assert result.exit_code == 4
     assert result.output.strip() == 'ERROR: No data has been entered yet, nothing to display.'
 
@@ -428,7 +434,7 @@ def test_edit(tmp_path):
     desc = 'edited expense'
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
+    result = init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
     with open(db_filepath, 'rb') as stream:
         restored = load(stream)
     expect = [UserExpense(id_num=1, dt='20/12/2022', amount=150.0, desc='edited expense')]
@@ -446,7 +452,7 @@ def test_edit_no_atributes(tmp_path):
     desc = None
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
+    result = init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
     assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: No values have been passed.'
 
@@ -460,7 +466,7 @@ def test_edit_invalid_date(tmp_path):
     desc = 'edited expense'
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
+    result = init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
     assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Invalid date format.'
 
@@ -471,7 +477,7 @@ def test_edit_database_not_exists():
     dt = '20/12/2022'
     amount = '150'
     desc = 'edited expense'
-    result = test_utils.init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
+    result = init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
     assert result.exit_code == 3
     assert result.output.strip() == f'ERROR: There is no such path: {db_filepath}.'
 
@@ -482,7 +488,7 @@ def test_edit_db_filepath_missing_extension(tmp_path):
     dt = '20/12/2022'
     amount = '150'
     desc = 'edited expense'
-    result = test_utils.init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
+    result = init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
     assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
@@ -493,7 +499,7 @@ def test_edit_db_filepath_another_missing_extension(tmp_path):
     dt = '20/12/2022'
     amount = '150'
     desc = 'edited expense'
-    result = test_utils.init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
+    result = init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
     assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
@@ -504,7 +510,7 @@ def test_edit_db_filepath_unsupported_extension(tmp_path):
     dt = '20/12/2022'
     amount = '150'
     desc = 'edited expense'
-    result = test_utils.init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
+    result = init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
     assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
@@ -517,7 +523,7 @@ def test_edit_empty_database(tmp_path):
     desc = 'edited expense'
     db_file = open(db_filepath, 'wb')
     db_file.close()
-    result = test_utils.init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
+    result = init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
     assert result.exit_code == 4
     assert result.output.strip() == 'ERROR: No data has been entered yet, nothing to edit.'
 
@@ -531,7 +537,7 @@ def test_edit_invalid_id_num(tmp_path):
     desc = 'edited expense'
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
+    result = init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
     assert result.exit_code == 2
     assert result.output.strip() == f'ERROR: ID {id_num}# not exists in database.'
 
@@ -545,7 +551,7 @@ def test_edit_0_amount(tmp_path):
     desc = 'edited expense'
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
+    result = init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
     assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: The expense amount cannot be zero.'
 
@@ -559,7 +565,7 @@ def test_edit_negative_amount(tmp_path):
     desc = 'edited expense'
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
+    result = init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
     assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: The expense amount cannot be negative.'
 
@@ -573,7 +579,7 @@ def test_edit_empty_desc(tmp_path):
     desc = ''
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
+    result = init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
     assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
@@ -587,7 +593,7 @@ def test_edit_space_desc(tmp_path):
     desc = ' '
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
+    result = init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
     assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
@@ -601,7 +607,7 @@ def test_edit_tab_desc(tmp_path):
     desc = '    '
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
+    result = init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
     assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
@@ -615,7 +621,7 @@ def test_edit_newline_desc(tmp_path):
     desc = '\n'
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
+    result = init_edit(id_num=id_num, db_filepath=db_filepath, dt=dt, amount=amount, desc=desc)
     assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
@@ -631,7 +637,7 @@ def test_import_from_with_content_expenses_empty(tmp_path):
         writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
         writer.writerow({'amount': 10, 'desc': 'first expense'})
-    result = test_utils.init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
+    result = init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
     with open(db_filepath, 'rb') as stream:
         restored = load(stream)
     expect_dt = date.today().strftime('%d/%m/%Y')
@@ -650,7 +656,7 @@ def test_import_from_with_content_expenses_not_exist(tmp_path):
         writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
         writer.writerow({'amount': 10, 'desc': 'first expense'})
-    result = test_utils.init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
+    result = init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
     with open(db_filepath, 'rb') as stream:
         restored = load(stream)
     expect_dt = date.today().strftime('%d/%m/%Y')
@@ -669,7 +675,7 @@ def test_import_from_with_content_user_dt(tmp_path):
         writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
         writer.writerow({'amount': 10, 'desc': 'first expense'})
-    result = test_utils.init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
+    result = init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
     with open(db_filepath, 'rb') as stream:
         restored = load(stream)
     expect = [UserExpense(id_num=1, amount=10, dt='23/05/1984', desc='first expense')]
@@ -685,7 +691,7 @@ def test_import_from_missing_extension_in_external_filepath(tmp_path):
     dt = None
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
+    result = init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
@@ -697,7 +703,7 @@ def test_import_from_another_missing_extension_in_external_filepath(tmp_path):
     dt = None
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
+    result = init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
@@ -709,7 +715,7 @@ def test_import_from_unsupported_extension_in_external_filepath(tmp_path):
     dt = None
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
+    result = init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
@@ -721,7 +727,7 @@ def test_import_from_missing_extension_in_db_filepath(tmp_path):
     dt = None
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
+    result = init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
@@ -733,7 +739,7 @@ def test_import_from_another_missing_extension_in_db_filepath(tmp_path):
     dt = None
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
+    result = init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
@@ -745,7 +751,7 @@ def test_import_from_unsupported_extension_in_db_filepath(tmp_path):
     dt = None
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
+    result = init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
@@ -754,7 +760,7 @@ def test_import_from_csv_not_exist(tmp_path):
     external_filepath = 'not_exist_file.csv'
     db_filepath = tmp_path/'file.db'
     dt = None
-    result = test_utils.init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
+    result = init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 3
     assert result.output.strip() == 'ERROR: File not exist.'
 
@@ -767,7 +773,7 @@ def test_import_from_only_headers_in_csv(tmp_path):
     with open(external_filepath, 'x', encoding='utf-8') as stream:
         writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
-    result = test_utils.init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
+    result = init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing file content.'
 
@@ -778,7 +784,7 @@ def test_import_from_empty_csv(tmp_path):
     dt = None
     stream = open(external_filepath, 'x', encoding='utf-8')
     stream.close()
-    result = test_utils.init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
+    result = init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing file content.'
 
@@ -792,7 +798,7 @@ def test_import_from_invalid_headers_in_csv(tmp_path):
         writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
         writer.writerow({'inv_amount': 10, 'inv_desc': 'first expense'})
-    result = test_utils.init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
+    result = init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 5
     assert result.output.strip() == f'ERROR: Invalid headers in {external_filepath}.'
 
@@ -806,7 +812,7 @@ def test_import_from_invalid_user_dt(tmp_path):
         writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
         writer.writerow({'amount': 10, 'desc': 'first expense'})
-    result = test_utils.init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
+    result = init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Invalid date format.'
 
@@ -820,7 +826,7 @@ def test_import_from_0_amount_in_csv(tmp_path):
         writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
         writer.writerow({'amount': 0, 'desc': 'first expense'})
-    result = test_utils.init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
+    result = init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: The expense amount cannot be zero.'
 
@@ -834,7 +840,7 @@ def test_import_from_negative_amount_in_csv(tmp_path):
         writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
         writer.writerow({'amount': -1, 'desc': 'first expense'})
-    result = test_utils.init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
+    result = init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: The expense amount cannot be negative.'
 
@@ -848,7 +854,7 @@ def test_import_from_no_desc_in_csv(tmp_path):
         writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
         writer.writerow({'amount': 10, 'desc': ''})
-    result = test_utils.init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
+    result = init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
@@ -862,7 +868,7 @@ def test_import_from_space_desc_in_csv(tmp_path):
         writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
         writer.writerow({'amount': 10, 'desc': ' '})
-    result = test_utils.init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
+    result = init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
@@ -876,7 +882,7 @@ def test_import_from_tab_desc_in_csv(tmp_path):
         writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
         writer.writerow({'amount': 10, 'desc': ' '})
-    result = test_utils.init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
+    result = init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
@@ -890,7 +896,7 @@ def test_import_from_newline_desc_in_csv(tmp_path):
         writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
         writer.writerow({'amount': 10, 'desc': '\n'})
-    result = test_utils.init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
+    result = init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 2
     assert result.output.strip() == 'ERROR: Missing description for the expense.'
 
@@ -904,7 +910,7 @@ def test_import_from_invalid_db_path(tmp_path):
         writer = DictWriter(stream, fieldnames=headers)
         writer.writeheader()
         writer.writerow({'amount': 10, 'desc': 'first expense'})
-    result = test_utils.init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
+    result = init_import_from(external_filepath=external_filepath, db_filepath=db_filepath, dt=dt)
     assert result.exit_code == 3
     assert result.output.strip() == f'ERROR: There is no such path: {db_filepath}.'
 
@@ -915,7 +921,7 @@ def test_export_to(tmp_path):
     db_filepath = tmp_path/'file.db'
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_export_to(external_filepath=external_filepath, db_filepath=db_filepath)
+    result = init_export_to(external_filepath=external_filepath, db_filepath=db_filepath)
     with open(external_filepath, encoding='utf-8') as stream:
         reader = DictReader(stream)
         restored = [row for row in reader]
@@ -933,7 +939,7 @@ def test_export_to_1_external_filepath_already_exist(tmp_path):
         dump(expenses, stream)
     csv_file = open(external_filepath, 'x')
     csv_file.close()
-    result = test_utils.init_export_to(external_filepath=external_filepath, db_filepath=db_filepath)
+    result = init_export_to(external_filepath=external_filepath, db_filepath=db_filepath)
     expect_external_filepath = str(tmp_path/'file(2).csv')
     assert result.exit_code == 0
     assert result.output.strip() == f'Saved as: {expect_external_filepath}.'
@@ -950,7 +956,7 @@ def test_export_to_1_2_external_filepath_already_exists(tmp_path):
     csv_file.close()
     another_csv_file = open(another_external_filepath, 'x')
     another_csv_file.close()
-    result = test_utils.init_export_to(external_filepath=external_filepath, db_filepath=db_filepath)
+    result = init_export_to(external_filepath=external_filepath, db_filepath=db_filepath)
     expect_external_filepath = str(tmp_path/'file(3).csv')
     assert result.exit_code == 0
     assert result.output.strip() == f'Saved as: {expect_external_filepath}.'
@@ -965,7 +971,7 @@ def test_export_to_2_external_filepath_already_exist(tmp_path):
         dump(expenses, stream)
     csv_file = open(second_external_filepath, 'x')
     csv_file.close()
-    result = test_utils.init_export_to(external_filepath=first_external_filepath, db_filepath=db_filepath)
+    result = init_export_to(external_filepath=first_external_filepath, db_filepath=db_filepath)
     assert result.exit_code == 0
     assert result.output.strip() == f'Saved as: {first_external_filepath}.'
 
@@ -976,7 +982,7 @@ def test_export_to_missing_extension_in_external_filepath(tmp_path):
     db_filepath = tmp_path/'file.db'
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_export_to(external_filepath=external_filepath, db_filepath=db_filepath)
+    result = init_export_to(external_filepath=external_filepath, db_filepath=db_filepath)
     assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
@@ -987,7 +993,7 @@ def test_export_to_another_missing_extension_in_external_filepath(tmp_path):
     db_filepath = tmp_path/'file.db'
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_export_to(external_filepath=external_filepath, db_filepath=db_filepath)
+    result = init_export_to(external_filepath=external_filepath, db_filepath=db_filepath)
     assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
@@ -998,7 +1004,7 @@ def test_export_to_unsupported_extension_in_external_filepath(tmp_path):
     db_filepath = tmp_path/'file.db'
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_export_to(external_filepath=external_filepath, db_filepath=db_filepath)
+    result = init_export_to(external_filepath=external_filepath, db_filepath=db_filepath)
     assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
@@ -1006,7 +1012,7 @@ def test_export_to_unsupported_extension_in_external_filepath(tmp_path):
 def test_export_to_db_file_not_exist(tmp_path):
     external_filepath = str(tmp_path/'file.csv')
     db_filepath = 'not_exist_file.db'
-    result = test_utils.init_export_to(external_filepath=external_filepath, db_filepath=db_filepath)
+    result = init_export_to(external_filepath=external_filepath, db_filepath=db_filepath)
     assert result.exit_code == 3
     assert result.output.strip() == f'ERROR: There is no such path: {db_filepath}.'
 
@@ -1017,7 +1023,7 @@ def test_export_to_missing_extension_in_db_filepath(tmp_path):
     db_filepath = tmp_path/'file'
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_export_to(external_filepath=external_filepath, db_filepath=db_filepath)
+    result = init_export_to(external_filepath=external_filepath, db_filepath=db_filepath)
     assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
@@ -1028,7 +1034,7 @@ def test_export_to_another_missing_extension_in_db_filepath(tmp_path):
     db_filepath = tmp_path/'file.'
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_export_to(external_filepath=external_filepath, db_filepath=db_filepath)
+    result = init_export_to(external_filepath=external_filepath, db_filepath=db_filepath)
     assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
@@ -1039,7 +1045,7 @@ def test_export_to_unsupported_extension_in_db_filepath(tmp_path):
     db_filepath = tmp_path/'file.txt'
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_export_to(external_filepath=external_filepath, db_filepath=db_filepath)
+    result = init_export_to(external_filepath=external_filepath, db_filepath=db_filepath)
     assert result.exit_code == 1
     assert result.output.strip() == 'ERROR: Missing extension for file or unsupported file type.'
 
@@ -1049,7 +1055,7 @@ def test_export_to_empty_db_file(tmp_path):
     db_filepath = tmp_path/'file.db'
     db_file = open(db_filepath, 'wb')
     db_file.close()
-    result = test_utils.init_export_to(external_filepath=external_filepath, db_filepath=db_filepath)
+    result = init_export_to(external_filepath=external_filepath, db_filepath=db_filepath)
     assert result.exit_code == 4
     assert result.output.strip() == 'ERROR: No data has been entered yet, nothing to write.'
 
@@ -1060,6 +1066,6 @@ def test_export_to_invalid_external_filepath(tmp_path):
     db_filepath = tmp_path/'file.db'
     with open(db_filepath, 'wb') as stream:
         dump(expenses, stream)
-    result = test_utils.init_export_to(external_filepath=external_filepath, db_filepath=db_filepath)
+    result = init_export_to(external_filepath=external_filepath, db_filepath=db_filepath)
     assert result.exit_code == 3
     assert result.output.strip() == f'ERROR: There is no such path: {external_filepath}.'
