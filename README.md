@@ -1,62 +1,58 @@
 # EMS (EXPENSE MANAGEMENT SYSTEM)
 
-## This program was created with you in mind, so that you can control and manage your budget. You can create your own database, manually add expenses to it or import them from CSV files, edit expenses in the database, and extract the database as an expense report to external CSV file.
+## This program was created to control and manage budget. You can create your own database, manually add expenses to it or import them from CSV files, edit expenses in the database, and extract the database as an expense report to external CSV file.
 
 :memo: Management is done via text mode in the terminal, and uses click library to divide program into subcommands ("add", "report", "edit", "import-from", "export-to").
 
-This is my extension of the project from module 7 completed during the Praktyczny Python (eng: Practical Python) course.
+This is my extension of the project from module 7 completed during the [Praktyczny Python](https://praktycznypython.pl/) (eng: Practical Python) course.
 
 ## The expense consists of:
+
 - ID - assigned by the program when creating an expense
 - date - format: "dd/mm/yyyy", by default program uses today's date but it is possibility to add own (see: [Usage](#usage)).
 - amount
 - description
 
-## In the future will be added:
-- Removing existing expenses
-- Assigning a given currency to the database and converting values according to current exchange rates
-- Support for more external file types
-
 ## Programming tools:
 
 ### Language:
+
 - Python 3.12
 
-  ### Libraries:
-    - csv
-    - dataclasses
-    - datetime
-    - pickle
-    - sys
-
   ### Third party libraries:
+
     - click
     - dateutil
     - pytest
 
 ## Repository layout:
+
 :memo: src/run.py - A main script of this project.
+
 ```
 ├── data
-│       ├── budget.db
-│       └── example_expenses.csv
-├── original_solution
+│       ├── budget.db
+│       └── example_expenses.csv
 ├── src
-│       └── run.py
+│       ├── funcs.py
+│       ├── models.py
+│       ├── run.py
+│       └── settings.py
 ├── tests
-│       ├── __init__.py
-│       └── test_run.py
+│       ├── test_run.py
+│       └── tests_utils.py
 ├── .gitignore
 ├── LICENSE
 ├── README.md
 └── requirements.txt
 ```
-:bulb: There is a directory original_solution which contains my first version of this project written during the course, so it is possible to compare the development of this project.
 
 ## Usage:
+
 :bulb: You can use all options of each command in any configuration. There are no conflicts between them.
 
 ### "add" command:
+
 :memo: Requires entering the amount and description of the expense. Optionally, you can enter a path to a custom database file and a date, otherwise the default path and today's date will be used.
     
     python src/run.py add 149.99 "Telephon installment"
@@ -71,6 +67,7 @@ This will add a new expense to the database file with the date you specified (de
 ---
 
 ### "report" command:
+
 :memo: Optionally, you can enter the path to a custom database, select a sorting method and change the order, or display expenses as Python code.
 
     python src/run.py report
@@ -91,6 +88,7 @@ This will change the order of expenses to descending, by default they are in asc
 ---
 
 ### "edit" command:
+
 :memo: Requires the ID of the expense to be edited and at least one of the options ("--dt", "--amount", "--desc"), otherwise an error will be reported.
 
 :warning: ID's cannot be edited.
@@ -113,6 +111,7 @@ This will edit all expense component values.
 ---
 
 ### "import-from" command:
+
 :memo: Requires a path to an external expense file that will be imported into the database. It only imports amounts and descriptions, a new ID and date will be assigned. Optionally, you can enter a path to a custom database file and a date, otherwise the default path and today's date will be used.
     
     python src/run.py import-from dir/file.csv
@@ -127,6 +126,7 @@ This will import expenses and adds the user's date to them. User can pass any se
 ---
 
 ### "export-to" command:
+
 :memo: Requires the path to the file where the expense file will be exported. Optionally, you can enter a path to a custom database file, otherwise the default path will be used.
 
     python src/run.py export-to dir/file.csv
