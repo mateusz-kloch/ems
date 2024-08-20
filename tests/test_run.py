@@ -2,7 +2,7 @@ from csv import DictReader, DictWriter
 from pickle import load, dump
 from datetime import date
 
-from src.utils import UserExpense
+from src.models import UserExpense
 from tests.tests_utils import (
     init_add,
     init_edit,
