@@ -64,6 +64,11 @@ def init_export_to(external_filepath, db_filepath):
 
 
 def test_add_db_exist(tmp_path):
+    """
+    Test for "add" subcommand.
+
+    This test verifies that "add" correctly writes the new expense to the existing expenses in the database file.
+    """
     expenses = [
         UserExpense(id_num=1, dt='12/03/2023', amount=1.0, desc='first expense')
     ]
@@ -87,6 +92,11 @@ def test_add_db_exist(tmp_path):
 
 
 def test_add_with_dt_db_exist(tmp_path):
+    """
+    Test for "add" subcommand.
+
+    This test verifies that "add" correctly writes the new expense with the given date to the existing database file.
+    """
     expenses = [
         UserExpense(id_num=1, dt='12/03/2023', amount=1.0, desc='first expense')
     ]
@@ -109,6 +119,11 @@ def test_add_with_dt_db_exist(tmp_path):
 
 
 def test_add_empty_db_file(tmp_path):
+    """
+    Test for "add" subcommand.
+
+    This test verifies that "add" correctly writes the new expense to an existing empty database file.
+    """
     db_filepath = tmp_path/'file.db'
     amount = '1.5'
     desc = 'expense'
@@ -126,6 +141,11 @@ def test_add_empty_db_file(tmp_path):
 
 
 def test_add_with_dt_empty_db_file(tmp_path):
+    """
+    Test for "add" subcommand.
+
+    This test verifies that "add" correctly writes the new expense with the given date to an existing empty database file.
+    """
     db_filepath = tmp_path/'file.db'
     amount = '1.5'
     desc = 'expense'
@@ -142,6 +162,11 @@ def test_add_with_dt_empty_db_file(tmp_path):
 
 
 def test_add_db_not_exist(tmp_path):
+    """
+    Test for "add" subcommand.
+
+    This test verifies that "add" correctly creates the database file and writes the new expense to it.
+    """
     amount = '1.5'
     desc = 'expense'
     db_filepath = tmp_path/'file.db'
@@ -157,6 +182,11 @@ def test_add_db_not_exist(tmp_path):
 
 
 def test_add_with_dt_db_not_exist(tmp_path):
+    """
+    Test for "add" subcommand.
+
+    This test verifies that "add" correctly creates a database file and writes a new expense to it with the given date.
+    """
     amount = '1.5'
     desc = 'expense'
     db_filepath = tmp_path/'file.db'
@@ -171,6 +201,11 @@ def test_add_with_dt_db_not_exist(tmp_path):
 
 
 def test_add_db_filepath_missing_extension(tmp_path):
+    """
+    Test for "add" subcommand.
+
+    This test checks whether "add" correctly handles an exception when the database file extension is missing.
+    """
     db_filepath = str(tmp_path/'file')
     amount = '1'
     desc = 'expense'
@@ -181,6 +216,11 @@ def test_add_db_filepath_missing_extension(tmp_path):
 
 
 def test_add_db_filepath_another_missing_extension(tmp_path):
+    """
+    Test for "add" subcommand.
+
+    This test checks whether "add" correctly handles an exception when the database file extension is missing.
+    """
     db_filepath = str(tmp_path/'file.')
     amount = '1'
     desc = 'expense'
@@ -191,6 +231,11 @@ def test_add_db_filepath_another_missing_extension(tmp_path):
 
 
 def test_add_db_filepath_unsupported_extension(tmp_path):
+    """
+    Test for "add" subcommand.
+
+    This test checks whether "add" correctly handles an exception when the database file extension is not supported.
+    """
     db_filepath = str(tmp_path/'file.txt')
     amount = '1'
     desc = 'expense'
@@ -201,6 +246,11 @@ def test_add_db_filepath_unsupported_extension(tmp_path):
 
 
 def test_add_invalid_dt(tmp_path):
+    """
+    Test for "add" subcommand.
+
+    This test checks whether "add" correctly handles an exception when an invalid date format is provided.
+    """
     amount = '10'
     desc = 'expense'
     db_filepath = tmp_path/'file.db'
@@ -211,6 +261,11 @@ def test_add_invalid_dt(tmp_path):
 
 
 def test_add_zero_amount(tmp_path):
+    """
+    Test for "add" subcommand.
+
+    This test checks whether "add" correctly handles an exception when a zero expense amount is provided.
+    """
     amount = '0'
     desc = 'expense'
     db_filepath = tmp_path/'file.db'
@@ -221,6 +276,11 @@ def test_add_zero_amount(tmp_path):
     
 
 def test_add_negative_amount(tmp_path):
+    """
+    Test for "add" subcommand.
+
+    This test checks whether "add" correctly handles an exception when a negative expense amount is provided.
+    """
     amount = '-1'
     desc = 'expense'
     db_filepath = tmp_path/'file.db'
@@ -231,6 +291,11 @@ def test_add_negative_amount(tmp_path):
 
 
 def test_add_empty_desc(tmp_path):
+    """
+    Test for "add" subcommand.
+
+    This test checks whether "add" correctly handles an exception when no expense description is provided.
+    """
     amount = '1'
     desc = ''
     db_filepath = tmp_path/'file.db'
@@ -241,6 +306,11 @@ def test_add_empty_desc(tmp_path):
 
 
 def test_add_space_desc(tmp_path):
+    """
+    Test for "add" subcommand.
+
+    This test checks whether "add" correctly handles an exception when an expense description containing only a space is provided.
+    """
     amount = '1'
     desc = ' '
     db_filepath = tmp_path/'file.db'
@@ -251,6 +321,11 @@ def test_add_space_desc(tmp_path):
 
 
 def test_add_tab_desc(tmp_path):
+    """
+    Test for "add" subcommand.
+
+    This test checks whether "add" correctly handles an exception when an expense description containing only a tab is provided.
+    """
     amount = '1'
     desc = ' '
     db_filepath = tmp_path/'file.db'
@@ -261,6 +336,11 @@ def test_add_tab_desc(tmp_path):
 
 
 def test_add_newline_desc(tmp_path):
+    """
+    Test for "add" subcommand.
+
+    This test checks whether "add" correctly handles an exception when an expense description containing only a new line tag is provided.
+    """
     amount = '1'
     desc = '\n'
     db_filepath = tmp_path/'file.db'
@@ -271,6 +351,11 @@ def test_add_newline_desc(tmp_path):
 
 
 def test_add_invalid_path():
+    """
+    Test for "add" subcommand.
+
+    This test checks whether "add" correctly handles an exception when an invalid database path is specified.
+    """
     amount = '10'
     desc = 'expense'
     db_filepath = 'invalid_dir/file.db'
@@ -281,6 +366,11 @@ def test_add_invalid_path():
 
 
 def test_report(tmp_path):
+    """
+    Test for "report" subcommand.
+
+    This test verifies that "report" correctly displays the expense from the database file.
+    """
     expenses = [UserExpense(id_num=1, dt='13/11/1954', amount=124.65, desc='first expense')]
     db_filepath = tmp_path/'file.db'
     sort = None
@@ -294,6 +384,11 @@ def test_report(tmp_path):
 
 
 def test_report_show_big(tmp_path):
+    """
+    Test for "report" subcommand.
+
+    This test verifies that "report" correctly tags an expense as big with a "[!]" if the threshold has been reached.
+    """
     expenses = [
         UserExpense(id_num=1, dt='13/11/1954', amount=499, desc='first expense'),
         UserExpense(id_num=2, dt='12/03/2023', amount=500, desc='second expense')
@@ -310,6 +405,11 @@ def test_report_show_big(tmp_path):
 
 
 def test_report_sort_default(tmp_path):
+    """
+    Test for "report" subcommand.
+
+    This test verifies that "report" correctly sorts expenses using the default method.
+    """
     expenses = [
         UserExpense(id_num=1, dt='13/11/1954', amount=124.65, desc='first expense'),
         UserExpense(id_num=3, dt='02/05/1999', amount=499, desc='third expense'),
@@ -327,6 +427,11 @@ def test_report_sort_default(tmp_path):
 
 
 def test_report_sort_default_descending(tmp_path):
+    """
+    Test for "report" subcommand.
+
+    This test verifies that "report" correctly sorts expenses using the default method in descending order.
+    """
     expenses = [
         UserExpense(id_num=1, dt='13/11/1954', amount=124.65, desc='first expense'),
         UserExpense(id_num=3, dt='02/05/1999', amount=499, desc='third expense'),
@@ -344,6 +449,11 @@ def test_report_sort_default_descending(tmp_path):
 
 
 def test_report_sort_date(tmp_path):
+    """
+    Test for "report" subcommand.
+
+    This test verifies that "report" correctly sorts expenses using the "date" method.
+    """
     expenses = [
         UserExpense(id_num=1, dt='13/11/1954', amount=124.65, desc='first expense'),
         UserExpense(id_num=2, dt='12/09/2021', amount=300, desc='second expense'),
@@ -361,6 +471,11 @@ def test_report_sort_date(tmp_path):
 
 
 def test_report_sort_date_descending(tmp_path):
+    """
+    Test for "report" subcommand.
+
+    This test verifies that "report" correctly sorts expenses using the "date" method in descending order.
+    """
     expenses = [
         UserExpense(id_num=1, dt='13/11/1954', amount=124.65, desc='first expense'),
         UserExpense(id_num=2, dt='12/09/2021', amount=300, desc='second expense'),
@@ -378,6 +493,11 @@ def test_report_sort_date_descending(tmp_path):
 
 
 def test_report_sort_amount(tmp_path):
+    """
+    Test for "report" subcommand.
+
+    This test verifies that "report" correctly sorts expenses using the "amount" method.
+    """
     expenses = [
         UserExpense(id_num=1, dt='13/11/1954', amount=124.65, desc='first expense'),
         UserExpense(id_num=3, dt='02/05/1999', amount=499, desc='third expense'),
@@ -395,6 +515,11 @@ def test_report_sort_amount(tmp_path):
 
 
 def test_report_sort_amount_descending(tmp_path):
+    """
+    Test for "report" subcommand.
+
+    This test verifies that "report" correctly sorts expenses using the "amount" method in descending order.
+    """
     expenses = [
         UserExpense(id_num=1, dt='13/11/1954', amount=124.65, desc='first expense'),
         UserExpense(id_num=3, dt='02/05/1999', amount=499, desc='third expense'),
@@ -412,6 +537,11 @@ def test_report_sort_amount_descending(tmp_path):
 
 
 def test_report_python_code(tmp_path):
+    """
+    Test for "report" subcommand.
+
+    This test checks whether "report" displays expenses as a representation of Python code.
+    """
     expenses = [UserExpense(id_num=1, dt='12/03/2001', amount=12, desc='first expense')]
     db_filepath = tmp_path/'file.db'
     sort = None
@@ -425,6 +555,11 @@ def test_report_python_code(tmp_path):
 
 
 def test_report_db_file_not_exist():
+    """
+    Test for "report" subcommand.
+
+    This test checks whether "report" correctly handles an exception when the database does not exist.
+    """
     db_filepath = 'not_exist_file.db'
     sort = None
     descending = False
@@ -435,6 +570,11 @@ def test_report_db_file_not_exist():
 
 
 def test_report_db_filepath_missing_extension(tmp_path):
+    """
+    Test for "report" subcommand.
+
+    This test checks whether "report" correctly handles an exception when the database file extension is missing.
+    """
     db_filepath = str(tmp_path/'file')
     sort = None
     descending = False
@@ -445,6 +585,11 @@ def test_report_db_filepath_missing_extension(tmp_path):
 
 
 def test_report_db_filepath_another_missing_extension(tmp_path):
+    """
+    Test for "report" subcommand.
+
+    This test checks whether "report" correctly handles an exception when the database file extension is missing.
+    """
     db_filepath = str(tmp_path/'file.')
     sort = None
     descending = False
@@ -455,6 +600,11 @@ def test_report_db_filepath_another_missing_extension(tmp_path):
 
 
 def test_report_db_filepath_unsupported_extension(tmp_path):
+    """
+    Test for "report" subcommand.
+
+    This test checks whether "report" correctly handles an exception when the database file extension is not supported.
+    """
     db_filepath = str(tmp_path/'file.txt')
     sort = None
     descending = False
@@ -465,6 +615,11 @@ def test_report_db_filepath_unsupported_extension(tmp_path):
 
 
 def test_report_empty_db_file(tmp_path):
+    """
+    Test for "report" subcommand.
+
+    This test checks whether "report" correctly handles an exception when the database file is empty.
+    """
     db_filepath = tmp_path/'file.db'
     sort = None
     descending = False
@@ -477,6 +632,11 @@ def test_report_empty_db_file(tmp_path):
 
 
 def test_edit(tmp_path):
+    """
+    Test for "edit" subcommand.
+
+    This test checks whether "edit" correctly edits expenses in the database file.
+    """
     expenses = [UserExpense(id_num=1, dt='13/03/2013', amount=50.0, desc='first expense')]
     db_filepath = tmp_path/'file.db'
     id_num = '1'
@@ -495,6 +655,11 @@ def test_edit(tmp_path):
 
 
 def test_edit_no_atributes(tmp_path):
+    """
+    Test for "edit" subcommand.
+
+    This test checks whether "edit" correctly handles an exception when no values have been passed to change.
+    """
     expenses = [UserExpense(id_num=1, dt='13/03/2013', amount=50.0, desc='first expense')]
     db_filepath = tmp_path/'file.db'
     id_num = '1'
@@ -509,6 +674,11 @@ def test_edit_no_atributes(tmp_path):
 
 
 def test_edit_invalid_date(tmp_path):
+    """
+    Test for "edit" subcommand.
+
+    This test checks whether "edit" correctly handles an exception when an invalid date has passed.
+    """
     expenses = [UserExpense(id_num=1, dt='13/03/2013', amount=50.0, desc='first expense')]
     db_filepath = tmp_path/'file.db'
     id_num = '1'
@@ -523,6 +693,11 @@ def test_edit_invalid_date(tmp_path):
 
 
 def test_edit_database_not_exists():
+    """
+    Test for "edit" subcommand.
+
+    This test checks whether "edit" correctly handles an exception when the database file does not exist.
+    """
     db_filepath = 'not_exist_file.db'
     id_num = '1'
     dt = '20/12/2022'
@@ -534,6 +709,11 @@ def test_edit_database_not_exists():
 
 
 def test_edit_db_filepath_missing_extension(tmp_path):
+    """
+    Test for "edit" subcommand.
+
+    This test checks whether "edit" correctly handles an exception when the database file extension is missing.
+    """
     db_filepath = str(tmp_path/'file')
     id_num = '1'
     dt = '20/12/2022'
@@ -545,6 +725,11 @@ def test_edit_db_filepath_missing_extension(tmp_path):
 
 
 def test_edit_db_filepath_another_missing_extension(tmp_path):
+    """
+    Test for "edit" subcommand.
+
+    This test checks whether "edit" correctly handles an exception when the database file extension is missing.
+    """
     db_filepath = str(tmp_path/'file.')
     id_num = '1'
     dt = '20/12/2022'
@@ -556,6 +741,11 @@ def test_edit_db_filepath_another_missing_extension(tmp_path):
 
 
 def test_edit_db_filepath_unsupported_extension(tmp_path):
+    """
+    Test for "edit" subcommand.
+
+    This test checks whether "edit" correctly handles an exception when the database file extension is not supported.
+    """
     db_filepath = str(tmp_path/'file.txt')
     id_num = '1'
     dt = '20/12/2022'
@@ -567,6 +757,11 @@ def test_edit_db_filepath_unsupported_extension(tmp_path):
 
 
 def test_edit_empty_database(tmp_path):
+    """
+    Test for "edit" subcommand.
+
+    This test checks whether "edit" correctly handles an exception when the database file is empty.
+    """
     db_filepath = tmp_path/'file.db'
     id_num = '1'
     dt = '20/12/2022'
@@ -580,6 +775,11 @@ def test_edit_empty_database(tmp_path):
 
 
 def test_edit_invalid_id_num(tmp_path):
+    """
+    Test for "edit" subcommand.
+
+    This test checks whether "edit" correctly handles an exception when the database file does not contain the ID selected for editing.
+    """
     expenses = [UserExpense(id_num=1, dt='13/03/2013', amount=50.0, desc='first expense')]
     db_filepath = tmp_path/'file.db'
     id_num = '2'
@@ -594,6 +794,11 @@ def test_edit_invalid_id_num(tmp_path):
 
 
 def test_edit_0_amount(tmp_path):
+    """
+    Test for "edit" subcommand.
+
+    This test checks whether "edit" correctly handles an exception when a zero expense amount is provided.
+    """
     expenses = [UserExpense(id_num=1, dt='13/03/2013', amount=50.0, desc='first expense')]
     db_filepath = tmp_path/'file.db'
     id_num = '1'
@@ -608,6 +813,11 @@ def test_edit_0_amount(tmp_path):
 
 
 def test_edit_negative_amount(tmp_path):
+    """
+    Test for "edit" subcommand.
+
+    This test checks whether "edit" correctly handles an exception when a negative expense amount is provided.
+    """
     expenses = [UserExpense(id_num=1, dt='13/03/2013', amount=50.0, desc='first expense')]
     db_filepath = tmp_path/'file.db'
     id_num = '1'
@@ -622,6 +832,11 @@ def test_edit_negative_amount(tmp_path):
 
 
 def test_edit_empty_desc(tmp_path):
+    """
+    Test for "edit" subcommand.
+
+    This test checks whether "edit" correctly handles an exception when a empty expense description is provided.
+    """
     expenses = [UserExpense(id_num=1, dt='13/03/2013', amount=50.0, desc='first expense')]
     db_filepath = tmp_path/'file.db'
     id_num = '1'
@@ -636,6 +851,11 @@ def test_edit_empty_desc(tmp_path):
 
 
 def test_edit_space_desc(tmp_path):
+    """
+    Test for "edit" subcommand.
+
+    This test checks whether "edit" correctly handles an exception when an expense description containing only a space is provided.
+    """
     expenses = [UserExpense(id_num=1, dt='13/03/2013', amount=50.0, desc='first expense')]
     db_filepath = tmp_path/'file.db'
     id_num = '1'
@@ -650,6 +870,11 @@ def test_edit_space_desc(tmp_path):
 
 
 def test_edit_tab_desc(tmp_path):
+    """
+    Test for "edit" subcommand.
+
+    This test checks whether "edit" correctly handles an exception when an expense description containing only a tab is provided.
+    """
     expenses = [UserExpense(id_num=1, dt='13/03/2013', amount=50.0, desc='first expense')]
     db_filepath = tmp_path/'file.db'
     id_num = '1'
@@ -664,6 +889,11 @@ def test_edit_tab_desc(tmp_path):
 
 
 def test_edit_newline_desc(tmp_path):
+    """
+    Test for "edit" subcommand.
+
+    This test checks whether "edit" correctly handles an exception when an expense description containing only a new line tag is provided.
+    """
     expenses = [UserExpense(id_num=1, dt='13/03/2013', amount=50.0, desc='first expense')]
     db_filepath = tmp_path/'file.db'
     id_num = '1'
@@ -678,6 +908,11 @@ def test_edit_newline_desc(tmp_path):
 
 
 def test_import_from_with_content_expenses_empty(tmp_path):
+    """
+    Test for "import-from" subcommand.
+
+    This test verifies that "import-from" correctly writes expenses from a file to a database file that contains other expenses.
+    """
     external_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.db'
     dt=None
@@ -699,6 +934,11 @@ def test_import_from_with_content_expenses_empty(tmp_path):
     
 
 def test_import_from_with_content_expenses_not_exist(tmp_path):
+    """
+    Test for "import-from" subcommand.
+
+    This test verifies that "import-from" correctly creates a database file and writes expenses from the file to it.
+    """
     external_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.db'
     dt=None
@@ -718,6 +958,11 @@ def test_import_from_with_content_expenses_not_exist(tmp_path):
 
 
 def test_import_from_with_content_user_dt(tmp_path):
+    """
+    Test for "import-from" subcommand.
+
+    This test verifies that "import-from" correctly writes expenses from the file with the given date to the database file.
+    """
     external_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.db'
     dt = '23.05.1984'
@@ -736,6 +981,11 @@ def test_import_from_with_content_user_dt(tmp_path):
 
 
 def test_import_from_missing_extension_in_external_filepath(tmp_path):
+    """
+    Test for "import-from" subcommand.
+
+    This test checks whether "import-from" correctly handles an exception when the imported file has no extension.
+    """
     expenses = [UserExpense(id_num=1, dt='15/09/1857', amount=567, desc='first expension')]
     external_filepath = str(tmp_path/'file')
     db_filepath = tmp_path/'file.db'
@@ -748,6 +998,11 @@ def test_import_from_missing_extension_in_external_filepath(tmp_path):
 
 
 def test_import_from_another_missing_extension_in_external_filepath(tmp_path):
+    """
+    Test for "import-from" subcommand.
+
+    This test checks whether "import-from" correctly handles an exception when the imported file has an invalid extension.
+    """
     expenses = [UserExpense(id_num=1, dt='15/09/1857', amount=567, desc='first expension')]
     external_filepath = str(tmp_path/'file.')
     db_filepath = tmp_path/'file.db'
@@ -760,6 +1015,11 @@ def test_import_from_another_missing_extension_in_external_filepath(tmp_path):
 
 
 def test_import_from_unsupported_extension_in_external_filepath(tmp_path):
+    """
+    Test for "import-from" subcommand.
+
+    This test checks whether "import-from" correctly handles an exception when the imported file has an invalid extension.
+    """
     expenses = [UserExpense(id_num=1, dt='15/09/1857', amount=567, desc='first expension')]
     external_filepath = str(tmp_path/'file.txt')
     db_filepath = tmp_path/'file.db'
@@ -772,6 +1032,11 @@ def test_import_from_unsupported_extension_in_external_filepath(tmp_path):
 
 
 def test_import_from_missing_extension_in_db_filepath(tmp_path):
+    """
+    Test for "import-from" subcommand.
+
+    This test checks whether "import-from" correctly handles an exception when the database file extension is missing.
+    """
     expenses = [UserExpense(id_num=1, dt='15/09/1857', amount=567, desc='first expension')]
     external_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file'
@@ -784,6 +1049,11 @@ def test_import_from_missing_extension_in_db_filepath(tmp_path):
 
 
 def test_import_from_another_missing_extension_in_db_filepath(tmp_path):
+    """
+    Test for "import-from" subcommand.
+
+    This test checks whether "import-from" correctly handles an exception when the database file extension is missing.
+    """
     expenses = [UserExpense(id_num=1, dt='15/09/1857', amount=567, desc='first expension')]
     external_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.'
@@ -796,6 +1066,11 @@ def test_import_from_another_missing_extension_in_db_filepath(tmp_path):
 
 
 def test_import_from_unsupported_extension_in_db_filepath(tmp_path):
+    """
+    Test for "import-from" subcommand.
+
+    This test checks whether "import-from" correctly handles an exception when the database file extension is not supported.
+    """
     expenses = [UserExpense(id_num=1, dt='15/09/1857', amount=567, desc='first expension')]
     external_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.txt'
@@ -808,6 +1083,11 @@ def test_import_from_unsupported_extension_in_db_filepath(tmp_path):
 
 
 def test_import_from_csv_not_exist(tmp_path):
+    """
+    Test for "import-from" subcommand.
+
+    This test checks whether "import-from" correctly handles an exception when the imported file does not exist.
+    """
     external_filepath = 'not_exist_file.csv'
     db_filepath = tmp_path/'file.db'
     dt = None
@@ -817,6 +1097,11 @@ def test_import_from_csv_not_exist(tmp_path):
 
 
 def test_import_from_only_headers_in_csv(tmp_path):
+    """
+    Test for "import-from" subcommand.
+
+    This test checks whether "import-from" correctly handles an exception when the imported file contains only headers.
+    """
     external_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.db'
     dt = None
@@ -830,6 +1115,11 @@ def test_import_from_only_headers_in_csv(tmp_path):
 
 
 def test_import_from_empty_csv(tmp_path):
+    """
+    Test for "import-from" subcommand.
+
+    This test checks whether "import-from" correctly handles an exception when the imported file is empty.
+    """
     external_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.db'
     dt = None
@@ -841,6 +1131,11 @@ def test_import_from_empty_csv(tmp_path):
 
 
 def test_import_from_invalid_headers_in_csv(tmp_path):
+    """
+    Test for "import-from" subcommand.
+
+    This test checks whether "import-from" correctly handles an exception when the imported file contains invalid headers.
+    """
     external_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.db'
     dt = None
@@ -855,6 +1150,11 @@ def test_import_from_invalid_headers_in_csv(tmp_path):
 
 
 def test_import_from_invalid_user_dt(tmp_path):
+    """
+    Test for "import-from" subcommand.
+
+    This test checks whether "import-from" correctly handles an exception when an invalid date format is provided.
+    """
     external_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.db'
     dt = 'awd1'
@@ -869,6 +1169,11 @@ def test_import_from_invalid_user_dt(tmp_path):
 
 
 def test_import_from_0_amount_in_csv(tmp_path):
+    """
+    Test for "import-from" subcommand.
+
+    This test checks whether "import-from" correctly handles an exception when one of the imported amounts is 0.
+    """
     external_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.db'
     dt = None
@@ -883,6 +1188,11 @@ def test_import_from_0_amount_in_csv(tmp_path):
 
 
 def test_import_from_negative_amount_in_csv(tmp_path):
+    """
+    Test for "import-from" subcommand.
+
+    This test checks whether "import-from" correctly handles an exception when one of the imported amounts is negative.
+    """
     external_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.db'
     dt = None
@@ -897,6 +1207,11 @@ def test_import_from_negative_amount_in_csv(tmp_path):
 
 
 def test_import_from_no_desc_in_csv(tmp_path):
+    """
+    Test for "import-from" subcommand.
+
+    This test checks whether "import-from" correctly handles an exception when one of the imported descriptions is empty.
+    """
     external_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.db'
     dt = None
@@ -911,6 +1226,11 @@ def test_import_from_no_desc_in_csv(tmp_path):
 
 
 def test_import_from_space_desc_in_csv(tmp_path):
+    """
+    Test for "import-from" subcommand.
+
+    This test checks whether "import-from" correctly handles an exception when one of the imported descriptions contains only a space.
+    """
     external_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.db'
     dt = None
@@ -925,6 +1245,11 @@ def test_import_from_space_desc_in_csv(tmp_path):
 
 
 def test_import_from_tab_desc_in_csv(tmp_path):
+    """
+    Test for "import-from" subcommand.
+
+    This test checks whether "import-from" correctly handles an exception when one of the imported descriptions contains only a tab.
+    """
     external_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.db'
     dt = None
@@ -939,6 +1264,11 @@ def test_import_from_tab_desc_in_csv(tmp_path):
 
 
 def test_import_from_newline_desc_in_csv(tmp_path):
+    """
+    Test for "import-from" subcommand.
+
+    This test checks whether "import-from" correctly handles an exception when one of the imported descriptions contains only a newline tag.
+    """
     external_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.db'
     dt = None
@@ -953,6 +1283,11 @@ def test_import_from_newline_desc_in_csv(tmp_path):
 
 
 def test_import_from_invalid_db_path(tmp_path):
+    """
+    Test for "import-from" subcommand.
+
+    This test checks whether "import-from" correctly handles an exception when the database file path is invalid.
+    """
     external_filepath = str(tmp_path/'file.csv')
     db_filepath = 'invalid_dir/file.db'
     dt = None
@@ -967,6 +1302,11 @@ def test_import_from_invalid_db_path(tmp_path):
 
 
 def test_export_to(tmp_path):
+    """
+    Test for "export-to" subcommand.
+
+    This test verifies that "export-to" correctly writes expenses from the database file to the external file.
+    """
     expenses = [UserExpense(id_num=1, dt='15/09/1857', amount=567, desc='first expension')]
     external_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.db'
@@ -983,6 +1323,11 @@ def test_export_to(tmp_path):
 
 
 def test_export_to_1_external_filepath_already_exist(tmp_path):
+    """
+    Test for "export-to" subcommand.
+
+    This test checks whether "export-to" correctly generates a new name for an external file if a file with the same name already exists.
+    """
     expenses = [UserExpense(id_num=1, dt='15/09/1857', amount=567, desc='first expension')]
     external_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.db'
@@ -997,6 +1342,11 @@ def test_export_to_1_external_filepath_already_exist(tmp_path):
 
 
 def test_export_to_1_2_external_filepath_already_exists(tmp_path):
+    """
+    Test for "export-to" subcommand.
+
+    This test checks whether "export-to" correctly generates a new names for an external file if a files with the same name already exists.
+    """
     expenses = [UserExpense(id_num=1, dt='15/09/1857', amount=567, desc='first expension')]
     external_filepath = str(tmp_path/'file.csv')
     another_external_filepath = str(tmp_path/'file(2).csv')
@@ -1014,6 +1364,11 @@ def test_export_to_1_2_external_filepath_already_exists(tmp_path):
 
 
 def test_export_to_2_external_filepath_already_exist(tmp_path):
+    """
+    Test for "export-to" subcommand.
+
+    This test checks that "export-to" correctly ignores a previously generated name if a name for the external file is not already in use.
+    """
     expenses = [UserExpense(id_num=1, dt='15/09/1857', amount=567, desc='first expension')]
     first_external_filepath = str(tmp_path/'file.csv')
     second_external_filepath = str(tmp_path/'file(2).csv')
@@ -1028,6 +1383,11 @@ def test_export_to_2_external_filepath_already_exist(tmp_path):
 
 
 def test_export_to_missing_extension_in_external_filepath(tmp_path):
+    """
+    Test for "export-to" subcommand.
+
+    This test checks whether "export-to" correctly handles an exception when the external file does not have an extension.
+    """
     expenses = [UserExpense(id_num=1, dt='15/09/1857', amount=567, desc='first expension')]
     external_filepath = str(tmp_path/'file')
     db_filepath = tmp_path/'file.db'
@@ -1039,6 +1399,11 @@ def test_export_to_missing_extension_in_external_filepath(tmp_path):
 
 
 def test_export_to_another_missing_extension_in_external_filepath(tmp_path):
+    """
+    Test for "export-to" subcommand.
+
+    This test checks whether "export-to" correctly handles an exception when an external file has an invalid extension.
+    """
     expenses = [UserExpense(id_num=1, dt='15/09/1857', amount=567, desc='first expension')]
     external_filepath = str(tmp_path/'file.')
     db_filepath = tmp_path/'file.db'
@@ -1050,6 +1415,11 @@ def test_export_to_another_missing_extension_in_external_filepath(tmp_path):
 
 
 def test_export_to_unsupported_extension_in_external_filepath(tmp_path):
+    """
+    Test for "export-to" subcommand.
+
+    This test checks whether "export-to" correctly handles an exception when an external file has an invalid extension.
+    """
     expenses = [UserExpense(id_num=1, dt='15/09/1857', amount=567, desc='first expension')]
     external_filepath = str(tmp_path/'file.txt')
     db_filepath = tmp_path/'file.db'
@@ -1061,6 +1431,11 @@ def test_export_to_unsupported_extension_in_external_filepath(tmp_path):
 
 
 def test_export_to_db_file_not_exist(tmp_path):
+    """
+    Test for "export-to" subcommand.
+
+    This test checks whether "export-to" correctly handles an exception when the database file does not exist.
+    """
     external_filepath = str(tmp_path/'file.csv')
     db_filepath = 'not_exist_file.db'
     result = init_export_to(external_filepath=external_filepath, db_filepath=db_filepath)
@@ -1069,6 +1444,11 @@ def test_export_to_db_file_not_exist(tmp_path):
 
 
 def test_export_to_missing_extension_in_db_filepath(tmp_path):
+    """
+    Test for "export-to" subcommand.
+
+    This test checks whether "export-to" correctly handles an exception when the database file extension is missing.
+    """
     expenses = [UserExpense(id_num=1, dt='15/09/1857', amount=567, desc='first expension')]
     external_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file'
@@ -1080,6 +1460,11 @@ def test_export_to_missing_extension_in_db_filepath(tmp_path):
 
 
 def test_export_to_another_missing_extension_in_db_filepath(tmp_path):
+    """
+    Test for "export-to" subcommand.
+
+    This test checks whether "export-to" correctly handles an exception when the database file extension is missing.
+    """
     expenses = [UserExpense(id_num=1, dt='15/09/1857', amount=567, desc='first expension')]
     external_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.'
@@ -1091,6 +1476,11 @@ def test_export_to_another_missing_extension_in_db_filepath(tmp_path):
 
 
 def test_export_to_unsupported_extension_in_db_filepath(tmp_path):
+    """
+    Test for "export-to" subcommand.
+
+    This test checks whether "export-to" correctly handles an exception when the database file extension is unsupported.
+    """
     expenses = [UserExpense(id_num=1, dt='15/09/1857', amount=567, desc='first expension')]
     external_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.txt'
@@ -1102,6 +1492,11 @@ def test_export_to_unsupported_extension_in_db_filepath(tmp_path):
 
 
 def test_export_to_empty_db_file(tmp_path):
+    """
+    Test for "export-to" subcommand.
+
+    This test checks whether "export-to" correctly handles an exception when the database file is empty.
+    """
     external_filepath = str(tmp_path/'file.csv')
     db_filepath = tmp_path/'file.db'
     db_file = open(db_filepath, 'wb')
@@ -1112,6 +1507,11 @@ def test_export_to_empty_db_file(tmp_path):
 
 
 def test_export_to_invalid_external_filepath(tmp_path):
+    """
+    Test for "export-to" subcommand.
+
+    This test checks whether "export-to" correctly handles an exception when the path to an external file is invalid.
+    """
     expenses = [UserExpense(id_num=1, dt='15/09/1857', amount=567, desc='first expension')]
     external_filepath = 'invalid_dir/file.csv'
     db_filepath = tmp_path/'file.db'
