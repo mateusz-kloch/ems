@@ -34,17 +34,19 @@ This is my extension of the project from module 7 completed during the [Praktycz
 │       ├── budget.db
 │       └── example_expenses.csv
 ├── src
+│       ├── __init__.py
+│       ├── cli.py
 │       ├── funcs.py
 │       ├── models.py
-│       ├── run.py
 │       └── settings.py
 ├── tests
-│       ├── test_run.py
-│       └── tests_utils.py
+│       ├── __init__.py
+│       ├── test_cli.py
 ├── .gitignore
 ├── LICENSE
 ├── README.md
-└── requirements.txt
+├── requirements.txt
+└── run.py
 ```
 
 ## Usage:
