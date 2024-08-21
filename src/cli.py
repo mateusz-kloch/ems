@@ -80,13 +80,6 @@ def add(amount: float, desc: str, db_filepath: str, dt: str|None) -> None:
         
     Returns:
         None
-        
-    Usage examples:
-        python src/run.py add 149.99 "Telephon installment"
-        python src/run.py add 50 "Small shopping" --db-filepath=dir/dir/file.db
-        python src/run.py add .99 "Chewing gum" --dt=13-09-1877
-        python src/run.py add 230 "Shopping" --dt=5.4.1967
-        python src/run.py add 25 "Electricity bill" --dt="12 06 2015" 
     """
     try:
         expenses: list[UserExpense] = read_db(db_filepath)
@@ -138,13 +131,6 @@ def report(db_filepath: str, sort: str|None, descending: bool, python: bool) -> 
     
     Returns:
         None
-        
-    Usage examples:
-        python src/run.py report
-        python src/run.py report --db-filepath=dir/database.db
-        python src/run.py report --sort=date
-        python src/run.py report --sort=amount --descending
-        python src/run.py report --python
     """
     try:
         expenses: list[UserExpense] = read_db(db_filepath)
@@ -199,13 +185,6 @@ def edit(id_num: int, db_filepath: str, dt: str|None, amount: float|None, desc: 
 
     Returns:
         None
-
-    Usage examples:
-        python src/run.py edit 13 --db-filepath=dir/file.db --amount=130
-        python src/run.py edit 24 --dt=12-03-1997
-        python src/run.py edit 5 --amount=1500
-        python src/run.py edit 190 --desc="Utility fee"
-        python src/run.py edit 26 --dt=5.12.2000 --amount=500 --desc="Some shopping"
     """
     try:
         validate_args_to_edit(dt, amount, desc)
@@ -265,13 +244,6 @@ def import_from(import_path: str, db_filepath: str, dt: str|None) -> None:
     
     Returns:
         None
-        
-    Usage examples:
-        python src/run.py import-from dir/file.csv
-        python src/run.py import-from "some dir/file.csv" --db-filepath=dir/database.db
-        python src/run.py import-from dir/dir/file.csv --dt=13-05-2005
-    
-    Path to a sample csv file with expenses: data/example_expenses.csv
     """
     try:
         file_type: str = specify_filetype(import_path)
@@ -345,10 +317,6 @@ def export_to(export_path: str, db_filepath: str) -> None:
     
     Returns:
         None
-        
-    Usage examples:
-        python src/run.py export-to dir/file.csv
-        python src/run.py export-to dir/dir/file.csv --db-filepath=dir/database.db
     """
     try:
         file_type: str = specify_filetype(export_path)
